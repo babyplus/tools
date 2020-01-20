@@ -77,16 +77,12 @@ int _count_char_of_hex(char * data_str, int * p_hex_num)
 
 int  main( int argc, char** argv ) 
 {
-	/***
-	 * 用法:
-	 *	./a.out 出口设备 目的地址 报文类型 其他内容 
-	 * 例子:
+	 /*
 	 * root@plus:~/C# gcc send_by_string.c && ./a.out enp0s3 "01:80:c2:00:00:36" "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02"
 	 * 
 	 */
 	uint8_t tmp_data[] = {};
 	int tmp_data_len = 0;
-	// 通过网卡名获取源地址
 	char * interface = argv[1];
 	int sd;
 	uint8_t src_mac[6];
@@ -122,15 +118,12 @@ int  main( int argc, char** argv )
 	memcpy(device.sll_addr, src_mac, 6);
 	device.sll_halen = htons(6);
 
-	//char * dst_mac_str = "01:80:c2:00:00:37";
 	char * dst_mac_str = argv[2];
 	_translate_str_to_uint8_t(dst_mac_str, dst_mac, 6);
         for(i = 0; i < sizeof(dst_mac); i++){
                 printf( i==5 ? "%.2x\n" : "%.2x:", dst_mac[i]);
         }
 
-	// vlan = 2 | protocol is cfm | is a ltm pdu | pdu data
-	// char * data_str = "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01";
 	char * data_str = argv[3];
 	int hex_num = 0;
 	int data_len = 0;
@@ -152,7 +145,7 @@ int  main( int argc, char** argv )
 
 	int bytes;
 	// Submit request for a raw socket descriptor.
-	if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {//创建发送的socket
+	if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
 	    perror ("socket() failed ");
 	    exit (EXIT_FAILURE);
 	}
