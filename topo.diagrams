@@ -1,0 +1,20 @@
+@startuml
+node node1
+cloud bridge
+node node2
+
+skinparam node {
+	borderColor Green
+	backgroundColor Yellow
+	backgroundColor<<shared node>> Magenta
+}
+
+skinparam node2 {
+	borderColor Green
+	backgroundColor Yellow
+	backgroundColor<<shared node>> Magenta
+}
+
+node1 -> bridge
+bridge -> node2
+@enduml
