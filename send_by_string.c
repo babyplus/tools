@@ -102,6 +102,10 @@ int  main( int argc, char** argv )
 	}
 	close (sd);
 	memcpy (src_mac, ifr.ifr_hwaddr.sa_data, sizeof(src_mac));
+	if (argv[4]) {
+		char * src_mac_str = argv[4];
+		_translate_str_to_uint8_t(src_mac_str, src_mac, 6);
+	}
 	int i = 0;
 	for(i = 0; i < sizeof(src_mac); i++){
 		printf( i==5 ? "%.2x\n" : "%.2x:", src_mac[i]);

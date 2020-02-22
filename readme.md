@@ -1,6 +1,6 @@
 ## Usage 
 
-sbs *device* *dst_mac* *message*
+sbs *device* *dst_mac* *message* *[src_mac]*
 
 ## Example 
 
