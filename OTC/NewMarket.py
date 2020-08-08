@@ -162,6 +162,45 @@ def init_sell_otc():
         i.sell_stock = random.randint(1, i.stock)
     return otc_list
 
+##计算σ
+def cul_sigma(buy_list, sell_list, offical_price=0.0, snapShot=[]):
+    total_price = 0.0
+    _sigma = 0.0
+    avg_price = 0.0
+    if snapShot == []:
+        # for i in buy_list:
+        #     total_price += i.buy_price
+        # for i in sell_list:
+        #     total_price += i.sell_price
+        # avg_price = round(total_price / (len(buy_list) + len(sell_list)), 4)
+
+        for i in buy_list:
+            _sigma += pow((i.buy_price - offical_price), 2)
+        for i in sell_list:
+            _sigma += pow((i.sell_price - offical_price), 2)
+        return  round(_sigma, 4)
+    else:
+        #第二轮之后的- offical_price分别按照买方和卖方，减去上一轮的买卖成交第二价格
+        # return cul_sigma(snapShot[len(snapShot)-2]['buy_list'], snapShot[len(snapShot)-2]['sell_list'])
+        for i in snapShot[len(snapShot)-2]['buyList']:
+            _sigma += pow((i.buy_price - snapShot[len(snapShot)-2]['deal_buy_price']), 2)
+        for i in snapShot[len(snapShot)-2]['sellList']:
+            _sigma += pow((i.sell_price - snapShot[len(snapShot)-2]['deal_sell_price']), 2)
+        return  round(_sigma, 4)
+
+def cul_Er(buy_list, sell_list, offical_price, snapShot=[]):
+    total_price = 0.0
+    if snapShot == []:
+        for i in buy_list:
+            total_price += i.buy_price
+        for i in sell_list:
+            total_price += i.sell_price
+        return round(total_price/(len(buy_list)+len(sell_list)) - offical_price, 4)
+    else:
+        #第二轮之后的- offical_price分别按照买方和卖方，减去上一轮的买卖成交第二价格
+        return round(total_price/(len(buy_list)+len(sell_list)) - \
+                     (snapShot[len(snapShot)-1]['deal_buy_price'] + \
+                      snapShot[len(snapShot)-1]['deal_sell_price'])/2, 4)
 
 if __name__ == '__main__':
     # 每一轮市场的情况都保存在这个快照数据中
@@ -216,13 +255,49 @@ if __name__ == '__main__':
     otc_debug("出让商名字:", _g_dbg_list)
     otc_debug_layer(0)
 
-    otc_debug("除了以上10个做市商会出让以外，其它做市商的出让价格和出让数量调整为0，同时随机生成受让价格和受让库存")
+    otc_debug("除了以上10个市商会出让以外，其它做市商的出让价格和出让数量调整为0，同时随机生成受让价格和受让库存")
     otc_debug_layer(1)
-
-
+    for i in otcList[10:]:
+        otc_debug_layer(1)
+        otc_debug("市商{} 出让价格和出让数量调整为0".format(i.name))
+        i.sell_stock = 0
+        i.sell_price = 0
+        i.buy_stock = random.randint(0,max(sell_list,key=lambda OTC: OTC.sell_stock).sell_stock)
+        otc_debug("在0到最大出让库存间随机生成 市商{} 受让数量: {}".format(i.name, i.buy_stock))
+        i.buy_price = round(random.uniform(official_price * 0.95, official_price * 1.05), 4)
+        otc_debug("在0到最大出让库存间随机生成 市商{} 受让价格: {}".format(i.name, i.buy_price))
+        otc_debug_layer(0)
     otc_debug_layer(0)
 
+    otc_debug("统计出让商和受让商")
+    otc_debug_layer(1)
+    sell_list = [i for i in otcList[:10]]
+    _sell_list = [i.name for i in sell_list]
+    otc_debug("出让商列表，共{}家".format(_sell_list.__len__()), _sell_list)
+    buy_list = [i for i in otcList[10:] if i.buy_stock > 0]
+    _buy_list = [i.name for i in buy_list]
+    otc_debug("受让商列表，共{}家".format(_buy_list.__len__()), _buy_list)
+    total_market_list = sell_list + buy_list
+    otc_debug("参与到市场的做市商数量: {}".format(total_market_list.__len__()))
+    otc_debug_layer(0)
 
+    otc_debug("计算所有出让库存的总和")
+    otc_debug_layer(1)
+    ε = sum([i.stock for i in sell_list])
+    otc_debug("第一轮sell_list(出让商列表)中每个出让商的stock(存货)值是固定的，所以出让库存的总和恒为 {}".format(ε))
+    otc_debug_layer(0)
+
+    otc_debug("总体标准差")
+    otc_debug_layer(1)
+    σ = cul_sigma(buy_list, sell_list, official_price)
+    otc_debug("官方价格: {}; 价格的总体标准差: {} ".format(official_price, σ))
+    otc_debug_layer(0)
+
+    otc_debug("根据市场情况计算期望 Expected Result")
+    otc_debug_layer(1)
+    Er = cul_Er(buy_list, sell_list, official_price)
+    otc_debug("官方价格: {}; 期望: {} ".format(official_price, Er))
+    otc_debug_layer(0)
 
 
     otc_debug_layer(0)
