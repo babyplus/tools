@@ -10,16 +10,16 @@ import sys
 
 def _handle(cell):
     # ctype： 0 empty,1 string, 2 number, 3 date, 4 boolean, 5 error
-    # if 0 == cell_0.ctype:
-    #     value_0 = ""
-    # elif 1 == cell_0.ctype:
-    #     value_0 = cell_0.value
-    # elif 2 == cell_0.ctype and 0 == cell_0.value % 1:
+    # if 0 == cell.ctype:
+    #     value = ""
+    # elif 1 == cell.ctype:
+    #     value = cell.value
+    # elif 2 == cell.ctype and 0 == cell.value % 1:
     #     print("整数")
-    #     value_0 = str(int(cell_0.value))
-    # elif 2 == cell_0.ctype and 0 != cell_0.value % 1:
+    #     value = str(int(cell.value))
+    # elif 2 == cell.ctype and 0 != cell.value % 1:
     #     print("浮点数")
-    #     value_0 = str(cell_0.value)
+    #     value = str(cell.value)
     return "" if 0 == cell.ctype else (cell.value if 1 == cell.ctype else (
             str(int(cell.value)) if (2 == cell.ctype and 0 == cell.value % 1) else str(cell.value)))
 
@@ -49,12 +49,8 @@ def change(excel_file_name, sheet_name, target_file_name):
         for col in range(0, cols):
             content = handle(sheet.cell(row, col))
             content_size = len(content)
-            print(content_size)
-            print(content)
             for word in words:
                 word_size = len(word[0])
-                print(word_size)
-                print(word)
                 if -1 != content.find(word[0]) and word_size == content_size:
                     copybook_sheet.write(row, col, word[1])
 
@@ -63,8 +59,11 @@ def change(excel_file_name, sheet_name, target_file_name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    '''
+    example:
+        python main.py origin.xls sheet1 keyword.xls target.xls
+    '''
     words = []
-    # python main.py "excel_file_name" "sheet_name" "change_file_name" "target_file_name"
     read(sys.argv[1:][2])
     print(words)
     change(sys.argv[1:][0], sys.argv[1:][1], sys.argv[1:][3])
