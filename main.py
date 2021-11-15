@@ -20,9 +20,7 @@ def process(path):
             origin_file_name = global_temp_path + "/" + file
             target_file_name = global_temp_path + "/" + str(global_file_index) + str(file_index) + ".pdf"
             os.rename(origin_file_name, target_file_name)
-            input_file = open(target_file_name, "rb")
-            global_input_list.append(input_file)
-            merger.append(input_file)
+            merger.append(target_file_name)
             file_index += 1
         zip_file.close()
     elif path.endswith(".pdf"):
@@ -34,8 +32,7 @@ def process(path):
 if __name__ == '__main__':
     global_path = 'C:/Users/root/Documents/六捷/202111/211109.黄汉加.交通发票'
     global_temp_path = global_path + "_unzip_temp_{}".format(time.time_ns())
-    output = global_path + "output.pdf"
-    global_input_list = []
+    output = global_path + "/output.pdf".format()
     global_pdf_file = []
     global_file_index = 0
 
@@ -51,8 +48,5 @@ if __name__ == '__main__':
         global_file_index += 1
 
     merger.write(output)
-
-    for i in global_input_list:
-        i.close()
-
+    merger.close()
     shutil.rmtree(global_temp_path, True)
