@@ -18,9 +18,9 @@ RUN mkdir -p /opt/export-client
 # Copy all files to that directory.
 COPY export-client /opt/export-client
 WORKDIR /opt/export-client/scripts
-RUN cd /opt/export-client/scripts
 # Install required Node.js packages (basically PhantomJS).
 RUN if [ "$(arch)" != "armv7l" ]; then npm install && rm -rf /tmp/phantom*; else apt-get install -y phantomjs --no-install-recommends --no-install-suggests; fi
+RUN npm install -S yargs
 RUN npm install -S yamljs
 RUN npm install -S jsdom 
 RUN npm install -S jquery

@@ -1,13 +1,79 @@
+const http = require("http");
+const fs = require("fs");
 const YAML = require('yamljs');
-var jsdom = require('jsdom');
+const jsdom = require('jsdom');
+const yargs = require('yargs').option('D',{
+  alias:'data',
+  demand:true,
+  default:'/tmp/test_latest.txt',
+  describe:'The path of data file.',
+  type:'string'
+})
+.option('U',{
+  alias:'url',
+  demand:true,
+  default:'http://127.0.0.1/pic',
+  describe:'The url of the echarts-node-export-server.',
+  type:'string'
+})
+.option('O',{
+  alias:'output',
+  demand:true,
+  default:'/tmp/images/',
+  describe:'The directory used to store downloaded files',
+  type:'string'
+})
+.usage('Usage: node export_images.js [options]')
+.example('node export_images.js --data /tmp/test_latest.txt --url http://127.0.0.1/pic --output /tmp/images/')
+.help('h')
+.alias('h','help');
+
+const argv = yargs.argv;
 const { JSDOM } = jsdom;
 const { window } = new JSDOM();
 const { document } = (new JSDOM('')).window;
 global.document = document;
-var $ = jQuery = require('jquery')(window);
- 
-console.log("---")
-YAML.load('/tmp/test_latest.txt', (response) =>
+const $ = jQuery = require('jquery')(window);
+if (!fs.existsSync(argv["output"])) fs.mkdirSync(argv["output"], 0744);
+
+function download(url, dest) {
+  return new Promise((resolve, reject) => {
+      const file = fs.createWriteStream(dest, { flags: "wx" });
+
+      const request = http.get(url, response => {
+          if (response.statusCode === 200) {
+              response.pipe(file);
+          } else {
+              file.close();
+              fs.unlink(dest, () => {}); // Delete temp file
+              reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
+          }
+      });
+
+      request.on("error", err => {
+          file.close();
+          fs.unlink(dest, () => {}); // Delete temp file
+          reject(err.message);
+      });
+
+      file.on("finish", () => {
+          resolve();
+      });
+
+      file.on("error", err => {
+          file.close();
+
+          if (err.code === "EEXIST") {
+              reject("File already exists");
+          } else {
+              fs.unlink(dest, () => {}); // Delete temp file
+              reject(err.message);
+          }
+      });
+  });
+}
+
+YAML.load(argv["data"], (response) =>
 {
     ping_times = []
     ping_results = []
@@ -65,29 +131,6 @@ YAML.load('/tmp/test_latest.txt', (response) =>
           "subtext": "",
           "text": ""
         },
-        "toolbox": {
-          "feature": {
-            "magicType": {
-              "show": "true",
-              "title": {
-                "bar": "Bar",
-                "line": "Line"
-              },
-              "type": [
-                "line",
-                "bar"
-              ]
-            },
-            "saveAsImage": {
-              "show": "true",
-              "title": "Save Image"
-            }
-          },
-          "show": "true"
-        },
-        "tooltip": {
-          "trigger": "axis"
-        },
         "xAxis": [
           {
             "boundaryGap": "false",
@@ -114,12 +157,8 @@ YAML.load('/tmp/test_latest.txt', (response) =>
         series.push(k)
       }
       echartLine_setOption["xAxis"][0]["data"] = ping_times
-      // echartLine_setOption["legend"]["data"] = series
       for (n = 0 ;n < series.length; n++){
         echartLine_setOption["legend"]["data"] = [series[n]]
-        // if (undefined == echartLine_setOption["series"][n]){
-        //     echartLine_setOption["series"][n] = {}
-        // }
         echartLine_setOption["series"][0] = {}
         echartLine_setOption["series"][0]["data"] = ping_maps[series[n]]
         echartLine_setOption["series"][0]["name"] = series[n]
@@ -134,7 +173,7 @@ YAML.load('/tmp/test_latest.txt', (response) =>
         }
         $.ajax({
           type: "post",
-          url:'http://172.18.0.1/pic',
+          url: argv["url"],
           dataType:'json',
           async: false,
           crossDomain: true,
@@ -144,7 +183,7 @@ YAML.load('/tmp/test_latest.txt', (response) =>
             'Content-Type': 'application/json',
           },
           success:function(response){
-            console.log("    " + series[n] + ": " + response["filename"])
+            download(argv["url"] + "/" + response["filename"], argv["output"] + series[n] + ".png")
           },
           error:function(error){
             console.log("error: "+JSON.stringify(error))
