@@ -95,6 +95,8 @@ YAML.load(argv["data"], (response) =>
       }
     }
     echartLine_setOption = {
+        "imageWidth": 1200,
+        "imageHeight": 500,
         "calculable": "true",
         "legend": {
           "data": [
