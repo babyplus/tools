@@ -7,10 +7,10 @@ original_path=`pwd`
 exec_path=`dirname $0`
 cd $exec_path
 
-directory=${1:-/vagrant/Documents/六捷/202202/0216.黄汉加.数据图像化/ping_results/}
+directory=${1:-/tmp}
 input_subdirectory=${2:-/images/}
 output_subdirectory=${3:-/archived/}
-dates=`bash date_to_date.sh $4 $5`
+dates=`python date_to_date.py $4 $5`
 host=$6
 input=$directory/$input_subdirectory
 
@@ -22,7 +22,7 @@ input=$directory/$input_subdirectory
     echo '# '$host > $file
     for d in $dates
     do
-        ls $input/$d | grep $host | awk -v date=$d '{print "## "date"\n\n![](../../images/" date "/"$1")\n\n"}' >> $file 
+        ls $input/$d | grep $host\\. | awk -v date=$d '{print "## "date"\n\n![](../../images/" date "/"$1")\n\n"}' >> $file
     done
     docker run -w /data/$output_subdirectory/by_host --rm --volume "$directory:/data" pandoc/latex $host.md -o $host.docx 
 }
