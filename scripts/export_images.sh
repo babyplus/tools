@@ -16,7 +16,7 @@ do
         output=$data_path/images/$date/
         mkdir -p $output
         [ 0 -ne `ls -A $output  | wc -l` ] || {
-            docker run --rm -v $data_path:$data_path --net host -it $image node export_images.js --output $output --data $data_file --url $url --timeout_substitute 5000
+            docker run --rm -v $data_path:$data_path --net host -it $image node export_images.js --output $output --data $data_file --url $url
         }
     }
 done

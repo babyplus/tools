@@ -20,18 +20,11 @@ const yargs = require('yargs').option('D',{
   alias:'output',
   demand:true,
   default:'/tmp/images/',
-  describe:'The directory used to store downloaded files.',
-  type:'string'
-})
-.option('T',{
-  alias:'timeout_substitute',
-  demand:true,
-  default:'5000',
-  describe:'Replaces the specified timeout period.',
+  describe:'The directory used to store downloaded files',
   type:'string'
 })
 .usage('Usage: node export_images.js [options]')
-.example('node export_images.js --data /tmp/test_latest.txt --url http://127.0.0.1/pic --output /tmp/images/ --timeout_substitute 5000')
+.example('node export_images.js --data /tmp/test_latest.txt --url http://127.0.0.1/pic --output /tmp/images/')
 .help('h')
 .alias('h','help');
 
@@ -85,7 +78,7 @@ YAML.load(argv["data"], (response) =>
     ping_times = []
     ping_results = []
     ping_maps = {}
-    timeout_substitute = argv["timeout_substitute"]
+    timeout_substitute = 5000
     for (r in response) {
         ping_times.push(response[r]["time"])
         ping_results.push(response[r]["results"])
@@ -200,3 +193,4 @@ YAML.load(argv["data"], (response) =>
         });
       }
 });
+
