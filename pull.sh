@@ -1,6 +1,5 @@
 host=$1
 
-date=${current_time%%_*}
 timezone="Europe/London"
 local_path=/tmp
 remote_path=/tmp/test
