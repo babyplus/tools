@@ -35,24 +35,24 @@ pull(){
     for i in {1..5}
     do
         local_archived_date=`TZ="$timezone" date $local_x_date -d "-${i}day"`
-        local_x_log=$local_x_path/$local_x_prefix$local_archived_date$local_x_suffix
+        local_x_file=$local_x_path/$local_x_prefix$local_archived_date$local_x_suffix
         remote_archived_date=`TZ="$timezone" date $remote_x_date -d "-${i}day"`
-        remote_x_log=$remote_x_path/$remote_x_prefix$remote_archived_date$remote_x_suffix
-        grep "md5sum_check: $host:$remote_x_log No such file or directory" $local_x_record &>/dev/null
-        [ 0 -eq $? -o -f $local_x_log ] || {
-            # No previous attempt was made to extract the file and $local_x_log does not exist.
-            # Try to extract the $remote_x_log from $host.
+        remote_x_file=$remote_x_path/$remote_x_prefix$remote_archived_date$remote_x_suffix
+        grep "md5sum_check: $host:$remote_x_file No such file or directory" $local_x_record &>/dev/null
+        [ 0 -eq $? -o -f $local_x_file ] || {
+            # No previous attempt was made to extract the file and $local_x_file does not exist.
+            # Try to extract the $remote_x_file from $host.
             ping $host -c 1 &>/dev/null
             [ 0 -ne $? ] || {
-                remote_x_md5=`ssh $host md5sum $remote_x_log 2>&1`
+                remote_x_md5=`ssh $host md5sum $remote_x_file 2>&1`
                 echo $remote_x_md5 | grep 'No such file or directory' &>/dev/null
                 [ 0 -eq $? ] && {
-                    echo md5sum_check: $host:$remote_x_log No such file or directory >> $local_x_record
+                    echo md5sum_check: $host:$remote_x_file No such file or directory >> $local_x_record
                 } || {
-                    scp $host:$remote_x_log $local_x_log
-                    local_x_md5=(`md5sum $local_x_log`)
+                    scp $host:$remote_x_file $local_x_file
+                    local_x_md5=(`md5sum $local_x_file`)
                     remote_x_md5=($remote_x_md5)
-                    [ "$local_x_md5" = "$remote_x_md5" ] || rm $local_x_log
+                    [ "$local_x_md5" = "$remote_x_md5" ] || rm $local_x_file
                 }
             }
         }
