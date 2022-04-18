@@ -46,10 +46,10 @@ pull(){
         grep "md5sum_check: $host:$remote_x_log No such file or directory" $local_x_record &>/dev/null
         [ 0 -eq $? -o -f $local_x_log ] || {
             [ -f $local_x_zip ] && {
-                echo $local_x_zip exist.
+                # echo $local_x_zip exist.
                 tmp_path=/tmp/tar_$RANDOM
                 mkdir -p $tmp_path
-                tar -xzf $local_x_zip -C $tmp_path
+                tar -xzf $local_x_zip -C $tmp_path &>/dev/null
                 rm -f $local_x_zip
                 mv $tmp_path/$remote_x_log $local_x_log
                 rm -rf $tmp_path
@@ -59,8 +59,8 @@ pull(){
                 ssh -o ConnectTimeout=5 $host rm $remote_x_zip
                 exit
             } || {
-                echo $local_x_zip does not exist.
-                echo try to pull the $remote_x_zip from $host.
+                # echo $local_x_zip does not exist.
+                # echo try to pull the $remote_x_zip from $host.
                 ping $host -c 1 &>/dev/null
                 [ 0 -ne $? ] || {
                     remote_x_md5=`ssh -o ConnectTimeout=5 $host md5sum $remote_x_zip 2>&1`
@@ -97,4 +97,3 @@ pull(){
 
 pull $local_A_data_path $local_A_data_format $local_A_record $remote_A_data_path $remote_A_data_format
 pull $local_B_data_path $local_B_data_format $local_B_record $remote_B_data_path $remote_B_data_format
-
