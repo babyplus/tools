@@ -42,7 +42,6 @@ pull(){
         remote_archived_date=`TZ="$timezone" date $remote_x_date -d "-${i}day"`
         remote_x_log=${remote_x_path}/${remote_x_prefix}${remote_archived_date}${remote_x_suffix}
         remote_x_zip=${remote_x_log}.gzip
-        remote_archived_date=`TZ="$timezone" date $remote_x_date -d "-${i}day"`
         grep "md5sum_check: $host:$remote_x_log No such file or directory" $local_x_record &>/dev/null
         [ 0 -eq $? -o -f $local_x_log ] || {
             [ -f $local_x_zip ] && {
