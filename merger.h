@@ -1,0 +1,383 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define WARN(fmt, arg...) printf("\033[33mWARN: "fmt"\033[0m", ##arg) 
+
+#ifndef OUTPUT_FILE_P
+#define OUTPUT_FILE_P marco_fp 
+#endif
+#ifndef MAXIMUM_CAPACITY_OF_ROW
+#define MAXIMUM_CAPACITY_OF_ROW 20
+#endif
+#ifndef KEY_LENGTH
+#define KEY_LENGTH 4
+#endif
+#ifndef TYPE_POSITION
+#define TYPE_POSITION 6
+#endif
+#ifndef DATA_BEGIN_POSITION
+#define DATA_BEGIN_POSITION 9
+#endif
+#ifndef FIRST_ROW
+#define FIRST_ROW ""
+#endif
+#ifndef SEPARATOR
+#define SEPARATOR "|"
+#endif
+#ifndef DEFAULT_PLACEHOLDER
+#define DEFAULT_PLACEHOLDER ""
+#endif
+
+#ifndef PLACEHOLDER_TYPE_0
+#define PLACEHOLDER_TYPE_0 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_1
+#define PLACEHOLDER_TYPE_1 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_2
+#define PLACEHOLDER_TYPE_2 DEFAULT_PLACEHOLDER  
+#endif
+#ifndef PLACEHOLDER_TYPE_3
+#define PLACEHOLDER_TYPE_3 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_4
+#define PLACEHOLDER_TYPE_4 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_5
+#define PLACEHOLDER_TYPE_5 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_6
+#define PLACEHOLDER_TYPE_6 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_7
+#define PLACEHOLDER_TYPE_7 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_8
+#define PLACEHOLDER_TYPE_8 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_9
+#define PLACEHOLDER_TYPE_9 DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_A
+#define PLACEHOLDER_TYPE_A DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_B
+#define PLACEHOLDER_TYPE_B DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_C
+#define PLACEHOLDER_TYPE_C DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_D
+#define PLACEHOLDER_TYPE_D DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_E
+#define PLACEHOLDER_TYPE_E DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_F
+#define PLACEHOLDER_TYPE_F DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_G
+#define PLACEHOLDER_TYPE_G DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_H
+#define PLACEHOLDER_TYPE_H DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_I
+#define PLACEHOLDER_TYPE_I DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_J
+#define PLACEHOLDER_TYPE_J DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_K
+#define PLACEHOLDER_TYPE_K DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_L
+#define PLACEHOLDER_TYPE_L DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_M
+#define PLACEHOLDER_TYPE_M DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_N
+#define PLACEHOLDER_TYPE_N DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_O
+#define PLACEHOLDER_TYPE_O DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_P
+#define PLACEHOLDER_TYPE_P DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_Q
+#define PLACEHOLDER_TYPE_Q DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_R
+#define PLACEHOLDER_TYPE_R DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_S
+#define PLACEHOLDER_TYPE_S DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_T
+#define PLACEHOLDER_TYPE_T DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_U
+#define PLACEHOLDER_TYPE_U DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_V
+#define PLACEHOLDER_TYPE_V DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_W
+#define PLACEHOLDER_TYPE_W DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_X
+#define PLACEHOLDER_TYPE_X DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_Y
+#define PLACEHOLDER_TYPE_Y DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_Z
+#define PLACEHOLDER_TYPE_Z DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_a
+#define PLACEHOLDER_TYPE_a DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_b
+#define PLACEHOLDER_TYPE_b DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_c
+#define PLACEHOLDER_TYPE_c DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_d
+#define PLACEHOLDER_TYPE_d DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_e
+#define PLACEHOLDER_TYPE_e DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_f
+#define PLACEHOLDER_TYPE_f DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_g
+#define PLACEHOLDER_TYPE_g DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_h
+#define PLACEHOLDER_TYPE_h DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_i
+#define PLACEHOLDER_TYPE_i DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_j
+#define PLACEHOLDER_TYPE_j DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_k
+#define PLACEHOLDER_TYPE_k DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_l
+#define PLACEHOLDER_TYPE_l DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_m
+#define PLACEHOLDER_TYPE_m DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_n
+#define PLACEHOLDER_TYPE_n DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_o
+#define PLACEHOLDER_TYPE_o DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_p
+#define PLACEHOLDER_TYPE_p DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_q
+#define PLACEHOLDER_TYPE_q DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_r
+#define PLACEHOLDER_TYPE_r DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_s
+#define PLACEHOLDER_TYPE_s DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_t
+#define PLACEHOLDER_TYPE_t DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_u
+#define PLACEHOLDER_TYPE_u DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_v
+#define PLACEHOLDER_TYPE_v DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_w
+#define PLACEHOLDER_TYPE_w DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_x
+#define PLACEHOLDER_TYPE_x DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_y
+#define PLACEHOLDER_TYPE_y DEFAULT_PLACEHOLDER 
+#endif
+#ifndef PLACEHOLDER_TYPE_z
+#define PLACEHOLDER_TYPE_z DEFAULT_PLACEHOLDER 
+#endif
+
+#define ASCII_OFFSET '0'
+#define UPPERCASE_BEGIN ('A' - ASCII_OFFSET)
+#define LOWERCASE_BEGIN ('a' - ASCII_OFFSET)
+#define GET_TYPE(TARGET, SOURCE) TARGET = (SOURCE[TYPE_POSITION]-ASCII_OFFSET);
+#define GET_KEY(TARGET, SOURCE) strncpy(TARGET, SOURCE, KEY_LENGTH); 
+
+#define OUTPUT_INIT(file) FILE* OUTPUT_FILE_P = fopen(file, "w");
+#define OUTPUT(...) do { fprintf(OUTPUT_FILE_P, __VA_ARGS__); } while(0);
+#define OUTPUT__CLR fclose(OUTPUT_FILE_P);
+
+#define EXCLUDE_CONFLICT(current_key, current_type, expected_type) do {\
+    if(expected_type==(current_type+1)){\
+        WARN("Data of the same key value and type is not supported. Ignore this entry(key:%s; type:%c).\n", current_key, current_type+ASCII_OFFSET);\
+        goto NEXT_LINE;\
+    }\
+}while(0);
+
+#define NEW_LINE_OR_NOT(current_key, last_key, expected_type) do {\
+    if ( 0 != strcmp(current_key, last_key) ) {\
+        OUTPUT("\n%s"SEPARATOR, current_key);\
+        expected_type = TYPE_INIT;\
+    }else{\
+        EXCLUDE_CONFLICT(current_key, current_type, expected_type)\
+        OUTPUT(SEPARATOR);\
+    }\
+}while(0);
+
+#define OUTPUT_PLACEHOLDER(match_type, type) if (match_type == type) OUTPUT(PLACEHOLDER_##match_type); 
+#define OUTPUT_PLACEHOLDER_IF_THE_TYPE_NO_MATCHED(type, current_type) do {\
+    while ( type < current_type ) {\
+        OUTPUT_PLACEHOLDER(TYPE_0, type);\
+        OUTPUT_PLACEHOLDER(TYPE_1, type);\
+        OUTPUT_PLACEHOLDER(TYPE_2, type);\
+        OUTPUT_PLACEHOLDER(TYPE_3, type);\
+        OUTPUT_PLACEHOLDER(TYPE_4, type);\
+        OUTPUT_PLACEHOLDER(TYPE_5, type);\
+        OUTPUT_PLACEHOLDER(TYPE_6, type);\
+        OUTPUT_PLACEHOLDER(TYPE_7, type);\
+        OUTPUT_PLACEHOLDER(TYPE_8, type);\
+        OUTPUT_PLACEHOLDER(TYPE_9, type);\
+        OUTPUT_PLACEHOLDER(TYPE_A, type);\
+        OUTPUT_PLACEHOLDER(TYPE_B, type);\
+        OUTPUT_PLACEHOLDER(TYPE_C, type);\
+        OUTPUT_PLACEHOLDER(TYPE_D, type);\
+        OUTPUT_PLACEHOLDER(TYPE_E, type);\
+        OUTPUT_PLACEHOLDER(TYPE_F, type);\
+        OUTPUT_PLACEHOLDER(TYPE_G, type);\
+        OUTPUT_PLACEHOLDER(TYPE_H, type);\
+        OUTPUT_PLACEHOLDER(TYPE_I, type);\
+        OUTPUT_PLACEHOLDER(TYPE_J, type);\
+        OUTPUT_PLACEHOLDER(TYPE_K, type);\
+        OUTPUT_PLACEHOLDER(TYPE_L, type);\
+        OUTPUT_PLACEHOLDER(TYPE_M, type);\
+        OUTPUT_PLACEHOLDER(TYPE_N, type);\
+        OUTPUT_PLACEHOLDER(TYPE_O, type);\
+        OUTPUT_PLACEHOLDER(TYPE_P, type);\
+        OUTPUT_PLACEHOLDER(TYPE_Q, type);\
+        OUTPUT_PLACEHOLDER(TYPE_R, type);\
+        OUTPUT_PLACEHOLDER(TYPE_S, type);\
+        OUTPUT_PLACEHOLDER(TYPE_T, type);\
+        OUTPUT_PLACEHOLDER(TYPE_U, type);\
+        OUTPUT_PLACEHOLDER(TYPE_V, type);\
+        OUTPUT_PLACEHOLDER(TYPE_W, type);\
+        OUTPUT_PLACEHOLDER(TYPE_X, type);\
+        OUTPUT_PLACEHOLDER(TYPE_Y, type);\
+        OUTPUT_PLACEHOLDER(TYPE_Z, type);\
+        OUTPUT_PLACEHOLDER(TYPE_a, type);\
+        OUTPUT_PLACEHOLDER(TYPE_b, type);\
+        OUTPUT_PLACEHOLDER(TYPE_c, type);\
+        OUTPUT_PLACEHOLDER(TYPE_d, type);\
+        OUTPUT_PLACEHOLDER(TYPE_e, type);\
+        OUTPUT_PLACEHOLDER(TYPE_f, type);\
+        OUTPUT_PLACEHOLDER(TYPE_g, type);\
+        OUTPUT_PLACEHOLDER(TYPE_h, type);\
+        OUTPUT_PLACEHOLDER(TYPE_i, type);\
+        OUTPUT_PLACEHOLDER(TYPE_j, type);\
+        OUTPUT_PLACEHOLDER(TYPE_k, type);\
+        OUTPUT_PLACEHOLDER(TYPE_l, type);\
+        OUTPUT_PLACEHOLDER(TYPE_m, type);\
+        OUTPUT_PLACEHOLDER(TYPE_n, type);\
+        OUTPUT_PLACEHOLDER(TYPE_o, type);\
+        OUTPUT_PLACEHOLDER(TYPE_p, type);\
+        OUTPUT_PLACEHOLDER(TYPE_q, type);\
+        OUTPUT_PLACEHOLDER(TYPE_r, type);\
+        OUTPUT_PLACEHOLDER(TYPE_s, type);\
+        OUTPUT_PLACEHOLDER(TYPE_t, type);\
+        OUTPUT_PLACEHOLDER(TYPE_u, type);\
+        OUTPUT_PLACEHOLDER(TYPE_v, type);\
+        OUTPUT_PLACEHOLDER(TYPE_w, type);\
+        OUTPUT_PLACEHOLDER(TYPE_x, type);\
+        OUTPUT_PLACEHOLDER(TYPE_y, type);\
+        OUTPUT_PLACEHOLDER(TYPE_z, type);\
+        if (TYPE_UNKNOWN <= type) break;\
+        type++;\
+    }\
+} while(0);
+
+typedef enum type_e
+{
+    TYPE_INIT,
+    TYPE_0 = TYPE_INIT,
+    TYPE_1,
+    TYPE_2,
+    TYPE_3,
+    TYPE_4,
+    TYPE_5,
+    TYPE_6,
+    TYPE_7,
+    TYPE_8,
+    TYPE_9,
+    TYPE_A = UPPERCASE_BEGIN,
+    TYPE_B,
+    TYPE_C,
+    TYPE_D,
+    TYPE_E,
+    TYPE_F,
+    TYPE_G,
+    TYPE_H,
+    TYPE_I,
+    TYPE_J,
+    TYPE_K,
+    TYPE_L,
+    TYPE_M,
+    TYPE_N,
+    TYPE_O,
+    TYPE_P,
+    TYPE_Q,
+    TYPE_R,
+    TYPE_S,
+    TYPE_T,
+    TYPE_U,
+    TYPE_V,
+    TYPE_W,
+    TYPE_X,
+    TYPE_Y,
+    TYPE_Z,
+    TYPE_a = LOWERCASE_BEGIN,
+    TYPE_b,
+    TYPE_c,
+    TYPE_d,
+    TYPE_e,
+    TYPE_f,
+    TYPE_g,
+    TYPE_h,
+    TYPE_i,
+    TYPE_j,
+    TYPE_k,
+    TYPE_l,
+    TYPE_m,
+    TYPE_n,
+    TYPE_o,
+    TYPE_p,
+    TYPE_q,
+    TYPE_r,
+    TYPE_s,
+    TYPE_t,
+    TYPE_u,
+    TYPE_v,
+    TYPE_w,
+    TYPE_x,
+    TYPE_y,
+    TYPE_z,
+    TYPE_LAST,
+    TYPE_UNKNOWN = TYPE_LAST
+} type_t;
+
