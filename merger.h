@@ -221,6 +221,12 @@
 #define GET_TYPE(TARGET, SOURCE) TARGET = (SOURCE[TYPE_POSITION]-ASCII_OFFSET);
 #define GET_KEY(TARGET, SOURCE) strncpy(TARGET, SOURCE, KEY_LENGTH); 
 
+#define GET_DATA_LENGTH(TARGET, SOURCE) do {\
+    int data_position = (DATA_BEGIN_POSITION - 1);\
+    for (; data_position < MAXIMUM_CAPACITY_OF_ROW+1 ; data_position++) if ('\n' == SOURCE[data_position]) break;\
+    TARGET = data_position - DATA_BEGIN_POSITION;\
+}while(0);
+
 #define OUTPUT_INIT(file) FILE* OUTPUT_FILE_P = fopen(file, "w");
 #define OUTPUT(...) do { fprintf(OUTPUT_FILE_P, __VA_ARGS__); } while(0);
 #define OUTPUT__CLR fclose(OUTPUT_FILE_P);

@@ -25,10 +25,9 @@ int main(int argc, char* argv[]){
         OUTPUT_PLACEHOLDER_IF_THE_TYPE_NO_MATCHED(expected_type, current_type);
 
         if (expected_type == current_type){
-            int i = (DATA_BEGIN_POSITION - 1);
-            for (; i < MAXIMUM_CAPACITY_OF_ROW+1 ; i++) if ('\n' == str[i]) break;
-            i = i - DATA_BEGIN_POSITION; 
-            OUTPUT("%.*s", i, str+DATA_BEGIN_POSITION);
+            int data_length;
+            GET_DATA_LENGTH(data_length, str);
+            OUTPUT("%.*s", data_length, str+DATA_BEGIN_POSITION);
             GET_KEY(last_key, str);
             expected_type = (TYPE_LAST == current_type) ? TYPE_INIT : ++current_type;
         }
