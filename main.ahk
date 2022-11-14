@@ -15,6 +15,7 @@ GConf = config.ini
 IniRead, GSubjects, %GConf%, default, subjects
 IniRead, GEditor, %GConf%, default, editor, notepad
 IniRead, GIcon, %GConf%, default, icon, icon.png
+IniRead, GDevMode, %GConf%, default, dev, Flase
 if FileExist(GIcon)
 	Menu, Tray, Icon, %GIcon%
 
@@ -36,7 +37,32 @@ Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
 
 ; Don't worry about the order, the menu will be sorted.
 
-MenuItems = 计算器/打开文件夹/复制路径/复制双斜杠路径/打开README.md/Cmd/Git bash
+MenuItems = 计算器/打开文件夹/复制路径/复制双斜杠路径/打开README.md/Cmd/Git bash/重新加载程序
+
+GLatestModTimestamps := []
+if("True" = GDevMode)
+{
+	DevFocuses := ["main.ahk", "config.ini", "icon.png"]
+	for _, DevFocus in DevFocuses{
+		FileGetTime, LatestModTimestamp, %A_ScriptDir%\%DevFocus%, M
+		GLatestModTimestamps[DevFocus] := LatestModTimestamp
+	}
+	loop
+	{
+		for _, DevFocus in DevFocuses{
+			FileGetTime, ModTimestamp, %A_ScriptDir%\%DevFocus%, M
+			if (GLatestModTimestamps[DevFocus] != ModTimestamp)
+			{
+				Msgbox, 36,, 重新加载？
+				IfMsgBox Yes
+					Reload
+				else
+					GLatestModTimestamps[DevFocus] := ModTimestamp
+			}
+		}
+		sleep 3
+	}
+}
 Exit
 
 ;___________________________________________
@@ -55,6 +81,10 @@ Return
 
 Button复制路径:
 	Clipboard := CustomGetPath()
+Return
+
+Button复制双斜杠路径:
+	MsgBox, Todo
 Return
 
 Button打开README.md:
@@ -76,6 +106,10 @@ Return
 ButtonGitbash:
 	path := CustomGetPath()
 	MsgBox, Todo
+Return
+
+Button重新加载程序:
+	Reload
 Return
 
 Submit:
@@ -213,7 +247,7 @@ CustomGetPath(){
 	Return path
 }
 
-CustomRecord(path, ByRef arr){
+CustomRecord(ByRef path, ByRef arr){
 	arr[path] := A_Now
 	Return
 }
