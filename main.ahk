@@ -16,6 +16,7 @@ IniRead, GSubjects, %GConf%, default, subjects
 IniRead, GEditor, %GConf%, default, editor, notepad
 IniRead, GIcon, %GConf%, default, icon, icon.png
 IniRead, GDevMode, %GConf%, default, dev, Flase
+IniRead, GGitBash, %GConf%, default, git, ""
 if FileExist(GIcon)
 	Menu, Tray, Icon, %GIcon%
 
@@ -104,8 +105,10 @@ ButtonCmd:
 Return
 
 ButtonGitbash:
-	path := CustomGetPath()
-	MsgBox, Todo
+	if ("" != GGitBash){
+		path := CustomGetPath()
+		Run, %GGitBash% --cd=%path%
+	}
 Return
 
 Button重新加载程序:
@@ -207,6 +210,9 @@ Return
 GuiHide:
 	Gui, hide
 return
+
+;___________________________________________
+;_____Function Section______________________
 
 CustomSetValueViaGui(ByRef input_gui,ByRef value){
 	Gui, %input_gui%:-Caption
