@@ -24,7 +24,7 @@ Gui, DateGui:Add, DateTime, y10 vGMyDateTime
 Gui, DateGui:Add, Button, x+10 y10 gTodaySelected, 今日
 Gui, DateGui:Add, Button, x+10 y10 gLatestSelected, 上一次选定
 Gui, DateGui:Add, Button, x+10 y10 gRecordsSelected, 历史选定
-Gui, DateGui:Add, Button, x+10 y10 gNoDateSelected, 取消
+Gui, DateGui:Add, Button, x+10 y10 gNoDateSelected, 默认路径
 Gui, SubjectGui:Add, ComboBox, y10 gSubmit vGSubject, %GSubjects%
 Gui, SubjectGui:Add, Button, x+10 y10 gSubjectsManagement, 分类管理
 Gui, TitleGui:Add, Edit, r9 vGtitle w135, 今日纪要
@@ -38,19 +38,21 @@ Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
 
 ; Don't worry about the order, the menu will be sorted.
 
-MenuItems = 计算器/打开文件夹/复制路径/复制双斜杠路径/打开README.md/Cmd/Git bash/重新加载程序
+MenuItems = 计算器/打开文件夹/复制window风格路径/复制双反斜杠路径/复制Linux风格路径/打开README.md/Cmd/Git bash/重新加载程序
 
 GLatestModTimestamps := []
 if("True" = GDevMode)
 {
 	DevFocuses := ["main.ahk", "config.ini", "icon.png"]
-	for _, DevFocus in DevFocuses{
-		FileGetTime, LatestModTimestamp, %A_ScriptDir%\%DevFocus%, M
-		GLatestModTimestamps[DevFocus] := LatestModTimestamp
+	for _, DevFocus in DevFocuses
+	{
+		FileGetTime, ModTimestamp, %A_ScriptDir%\%DevFocus%, M
+		GLatestModTimestamps[DevFocus] := ModTimestamp
 	}
 	loop
 	{
-		for _, DevFocus in DevFocuses{
+		for _, DevFocus in DevFocuses
+		{
 			FileGetTime, ModTimestamp, %A_ScriptDir%\%DevFocus%, M
 			if (GLatestModTimestamps[DevFocus] != ModTimestamp)
 			{
@@ -80,12 +82,18 @@ Button打开文件夹:
 	Run, explorer %path%
 Return
 
-Button复制路径:
+Button复制window风格路径:
 	Clipboard := CustomGetPath()
 Return
 
-Button复制双斜杠路径:
-	MsgBox, Todo
+Button复制Linux风格路径:
+	path := CustomGetPath()
+	Clipboard := StrReplace(path, "\", "/")
+Return
+
+Button复制双反斜杠路径:
+	path := CustomGetPath()
+	Clipboard := StrReplace(path, "\", "\\")
 Return
 
 Button打开README.md:
@@ -93,7 +101,8 @@ Button打开README.md:
 	if (A_WorkingDir = path)
 		Return
 	mdFile := path "\README.md"
-	if !FileExist(mdFile){
+	if !FileExist(mdFile)
+	{
 		FileAppend, # %Gtitle%`n, %mdFile%
 	}
 	Run, %GEditor% %mdFile%
@@ -105,7 +114,8 @@ ButtonCmd:
 Return
 
 ButtonGitbash:
-	if ("" != GGitBash){
+	if ("" != GGitBash)
+	{
 		path := CustomGetPath()
 		Run, %GGitBash% --cd=%path%
 	}
@@ -195,7 +205,6 @@ Return
 		IfWinNotActive
 		{
 			sleep, 100
-
 			IfWinNotActive
 			{
 				Gosub, GuiHide
@@ -214,7 +223,8 @@ return
 ;___________________________________________
 ;_____Function Section______________________
 
-CustomSetValueViaGui(ByRef input_gui,ByRef value){
+CustomSetValueViaGui(ByRef input_gui,ByRef value)
+{
 	Gui, %input_gui%:-Caption
 	Gui, %input_gui%:Show
 	value = 
@@ -230,7 +240,8 @@ CustomSetValueViaGui(ByRef input_gui,ByRef value){
 	Return
 }
 
-CustomGetPath(){
+CustomGetPath()
+{
 	global GMyDateTime
 	global GSubject
 	global Gtitle
@@ -253,16 +264,20 @@ CustomGetPath(){
 	Return path
 }
 
-CustomRecord(ByRef path, ByRef arr){
+CustomRecord(ByRef path, ByRef arr)
+{
 	arr[path] := A_Now
 	Return
 }
 
-CustomGetLatestRecord(ByRef arr){
+CustomGetLatestRecord(ByRef arr)
+{
 	tempK := 
 	tempV := 0
-	for k,v in arr{
-		if (tempV < v){
+	for k,v in arr
+	{
+		if (tempV < v)
+		{
 			tempK := k
 			tempV := v
 		}	
