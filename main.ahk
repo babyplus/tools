@@ -17,6 +17,7 @@ IniRead, GEditor, %GConf%, default, editor, notepad
 IniRead, GIcon, %GConf%, default, icon, icon.png
 IniRead, GDevMode, %GConf%, default, dev, Flase
 IniRead, GGitBash, %GConf%, default, git, ""
+IniRead, GMenuItems, %GConf%, items
 if FileExist(GIcon)
 	Menu, Tray, Icon, %GIcon%
 
@@ -38,7 +39,7 @@ Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
 
 ; Don't worry about the order, the menu will be sorted.
 
-MenuItems = 计算器/打开文件夹/复制window风格路径/复制双反斜杠路径/复制Linux风格路径/打开README.md/Cmd/Git bash/重新加载程序
+MenuItems := GMenuItems
 
 GLatestModTimestamps := []
 if("True" = GDevMode)
@@ -145,7 +146,10 @@ Return
 RecordsSelected:
 	GMyDateTime := "pass"
 	GPastEntrySelected := A_WorkingDir
-	msgBox, Todo
+	sortedTimestamps := ""
+	for k, v in GPastEntries
+		sortedTimestamps := "" = sortedTimestamps ? v : sortedTimestamps " " v
+	Sort sortedTimestamps, N
 Return
 
 SubjectsManagement:
@@ -171,9 +175,7 @@ Return
 
 ~WheelLeft::
 ~WheelRight::
-	;Joins sorted main menu and dynamic menu
-	Sort, MenuItems, D/
-	TempMenu = %MenuItems%
+	TempMenu = %GMenuItems%
 
 	;clears earlier entries
 	Loop
@@ -185,7 +187,7 @@ Return
 	Gui, Margin, 0, 0
 
 	;creates new entries
-	Loop, Parse, TempMenu, /
+	Loop, Parse, TempMenu, `n, `r
 	{
 		MenuItem%A_Index% = %A_LoopField%
 		Gui, Add, Button, -theme +0x900 w160, %A_LoopField%
