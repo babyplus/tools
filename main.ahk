@@ -10,7 +10,9 @@ SetTitleMatchMode, slow
 #SingleInstance
 
 GPastEntries := []
+GPastEntriesEx := []
 GPastEntrySelected :=
+GPastEntriesSelected :=
 GConf = config.ini
 IniRead, GSubjects, %GConf%, default, subjects
 IniRead, GEditor, %GConf%, default, editor, notepad
@@ -30,16 +32,10 @@ Gui, SubjectGui:Add, ComboBox, y10 gSubmit vGSubject, %GSubjects%
 Gui, SubjectGui:Add, Button, x+10 y10 gSubjectsManagement, 分类管理
 Gui, TitleGui:Add, Edit, r9 vGtitle w135, 今日纪要
 Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
+Gui, PastEntriesSelectedGui:Add, ListBox, gSubmit vGPastEntrySelected HwndEntriesList w800 h400
 
 ;___________________________________________
-;_____Menu Definitions______________________
-
-; Create / Edit Menu Items here.
-; You can't use spaces in keys/values/section names.
-
-; Don't worry about the order, the menu will be sorted.
-
-MenuItems := GMenuItems
+;_____Development mode______________________
 
 GLatestModTimestamps := []
 if("True" = GDevMode)
@@ -145,11 +141,22 @@ Return
 
 RecordsSelected:
 	GMyDateTime := "pass"
-	GPastEntrySelected := A_WorkingDir
+	GPastEntriesSelected := 
 	sortedTimestamps := ""
-	for k, v in GPastEntries
-		sortedTimestamps := "" = sortedTimestamps ? v : sortedTimestamps " " v
-	Sort sortedTimestamps, N
+	if GPastEntries.Count() > 0 {
+		CustomRefreshPastEntriesEx()
+		for k, v in GPastEntries
+			sortedTimestamps := "" = sortedTimestamps ? v : sortedTimestamps "," v
+		Sort sortedTimestamps, N D,
+		Loop, Parse, sortedTimestamps, `,
+			GPastEntriesSelected := "" = GPastEntriesSelected ? GPastEntriesEx[A_LoopField] : GPastEntriesSelected "|" GPastEntriesEx[A_LoopField]
+		GuiControl, , %EntriesList%, |%GPastEntriesSelected%
+		CustomSetValueViaGui("PastEntriesSelectedGui", GPastEntrySelected)
+	} else {
+		GPastEntrySelected := A_WorkingDir
+		CustomRecord(GPastEntrySelected, GPastEntries)
+	}
+
 Return
 
 SubjectsManagement:
@@ -285,4 +292,13 @@ CustomGetLatestRecord(ByRef arr)
 		}	
 	}
 	Return tempK
+}
+
+CustomRefreshPastEntriesEx()
+{
+	global GPastEntries
+	global GPastEntriesEx
+	GPastEntriesEx := []
+	for k,v in GPastEntries
+		GPastEntriesEx[v] := k
 }
