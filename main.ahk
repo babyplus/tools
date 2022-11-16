@@ -5,8 +5,6 @@ UMDelay = 20
 
 SetFormat, float, 0.0
 SetBatchLines, 10ms 
-SetTitleMatchMode, 2
-SetTitleMatchMode, slow
 #SingleInstance
 
 GPastEntries := []
@@ -28,7 +26,7 @@ Gui, DateGui:Add, Button, x+10 y10 gTodaySelected, 今日
 Gui, DateGui:Add, Button, x+10 y10 gLatestSelected, 上一次选定
 Gui, DateGui:Add, Button, x+10 y10 gRecordsSelected, 历史选定
 Gui, DateGui:Add, Button, x+10 y10 gNoDateSelected, 默认路径
-Gui, SubjectGui:Add, ComboBox, y10 gSubmit vGSubject, %GSubjects%
+Gui, SubjectGui:Add, DropDownList, y10 gSubmit vGSubject, %GSubjects%
 Gui, SubjectGui:Add, Button, x+10 y10 gSubjectsManagement, 分类管理
 Gui, TitleGui:Add, Edit, r9 vGtitle w135, 今日纪要
 Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
@@ -100,7 +98,15 @@ Button打开README.md:
 	mdFile := path "\README.md"
 	if !FileExist(mdFile)
 	{
-		FileAppend, # %Gtitle%`n, %mdFile%
+		FileAppend, # %Gtitle%  `n, %mdFile%, UTF-8
+		FileAppend, `n, %mdFile%
+		RegExDate :=
+		RegExFound := RegExMatch(GMyDateTime, "^[0-9]{8}", RegExDate)
+		if RegExFound 
+		{
+			FileAppend, *创建于%RegExDate%*  `n, %mdFile%
+			FileAppend, `n, %mdFile%
+		}
 	}
 	Run, %GEditor% %mdFile%
 Return
@@ -143,7 +149,7 @@ RecordsSelected:
 	GMyDateTime := "pass"
 	GPastEntriesSelected := 
 	sortedTimestamps := ""
-	if GPastEntries.Count() > 0 {
+	if GPastEntries.Count() {
 		CustomRefreshPastEntriesEx()
 		for k, v in GPastEntries
 			sortedTimestamps := "" = sortedTimestamps ? v : sortedTimestamps "," v
@@ -197,7 +203,7 @@ Return
 	Loop, Parse, TempMenu, `n, `r
 	{
 		MenuItem%A_Index% = %A_LoopField%
-		Gui, Add, Button, -theme +0x900 w160, %A_LoopField%
+		Gui, Add, Button, -theme +0x100 w160 h30, %A_LoopField%
 	}
 
 	;show the menu
