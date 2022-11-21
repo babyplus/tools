@@ -11,6 +11,7 @@ GPastEntries := []
 GPastEntriesEx := []
 GPastEntrySelected :=
 GPastEntriesSelected :=
+GProjectSelected :=
 GConf = config.ini
 IniRead, GSubjects, %GConf%, default, subjects
 IniRead, GEditor, %GConf%, default, editor, notepad
@@ -18,19 +19,23 @@ IniRead, GIcon, %GConf%, default, icon, icon.png
 IniRead, GDevMode, %GConf%, default, dev, Flase
 IniRead, GGitBash, %GConf%, default, git, ""
 IniRead, GMenuItems, %GConf%, items
+IniRead, GProjects, %GConf%, projects
 if FileExist(GIcon)
 	Menu, Tray, Icon, %GIcon%
 
-Gui, DateGui:Add, DateTime, y10 vGMyDateTime
-Gui, DateGui:Add, Button, x+10 y10 gTodaySelected, 今日
-Gui, DateGui:Add, Button, x+10 y10 gLatestSelected, 上一次选定
-Gui, DateGui:Add, Button, x+10 y10 gRecordsSelected, 历史选定
-Gui, DateGui:Add, Button, x+10 y10 gNoDateSelected, 默认路径
+Gui, MixGui:Add, DateTime, w200 y10 vGMyDateTime
+Gui, MixGui:Add, Button, x+10 y10 gTodaySelected, 今日
+Gui, MixGui:Add, Button, x10 y+10 gDefaultSelected, 默认路径
+Gui, MixGui:Add, Button, x+10 gProjectsSelected, 自定义项目
+Gui, MixGui:Add, Button, x+10 gLatestSelected, 上次选定
+Gui, MixGui:Add, Button, x+10 gRecordsSelected, 历史
 Gui, SubjectGui:Add, DropDownList, y10 gSubmit vGSubject, %GSubjects%
 Gui, SubjectGui:Add, Button, x+10 y10 gSubjectsManagement, 分类管理
 Gui, TitleGui:Add, Edit, r9 vGtitle w135, 今日纪要
 Gui, TitleGui:Add, Button, gSubmit -theme +0x900 w40, 确定
-Gui, PastEntriesSelectedGui:Add, ListBox, gSubmit vGPastEntrySelected HwndEntriesList w800 h400
+Gui, PastEntriesGui:Add, ListBox, gSubmit vGPastEntrySelected HwndPastEntriesList w800 h400
+Gui, ProjectsGui:Add, ListBox, gSubmit vGProjectSelected HwndProjectsList w800 h400
+Gui, ProjectsGui:Add, Button, x10 y+10 gProjectsManagement, 项目管理
 
 ;___________________________________________
 ;_____Development mode______________________
@@ -117,7 +122,7 @@ ButtonCmd:
 Return
 
 ButtonGitbash:
-	if ("" != GGitBash)
+	if FileExist(GGitBash)
 	{
 		path := CustomGetPath()
 		Run, %GGitBash% --cd=%path%
@@ -136,8 +141,23 @@ TodaySelected:
 	GMyDateTime := A_Now
 Return
 
-NoDateSelected:
+DefaultSelected:
 	GMyDateTime := "null"
+Return
+
+ProjectsSelected:
+	GMyDateTime := "pass"
+	GProjectSelected := 
+	Projects :=
+
+	Loop, Parse, GProjects, `n, `r
+		Projects := "" = Projects ? A_LoopField : Projects "|" A_LoopField
+
+	if Projects {
+		GuiControl, , %ProjectsList%, |%Projects%
+		CustomSetValueViaGui("ProjectsGui", GProjectSelected)
+	}else
+		GProjectSelected := A_WorkingDir
 Return
 
 LatestSelected:
@@ -156,19 +176,25 @@ RecordsSelected:
 		Sort sortedTimestamps, N D,
 		Loop, Parse, sortedTimestamps, `,
 			GPastEntriesSelected := "" = GPastEntriesSelected ? GPastEntriesEx[A_LoopField] : GPastEntriesSelected "|" GPastEntriesEx[A_LoopField]
-		GuiControl, , %EntriesList%, |%GPastEntriesSelected%
-		CustomSetValueViaGui("PastEntriesSelectedGui", GPastEntrySelected)
-	} else {
+		GuiControl, , %PastEntriesList%, |%GPastEntriesSelected%
+		CustomSetValueViaGui("PastEntriesGui", GPastEntrySelected)
+	} else 
 		GPastEntrySelected := A_WorkingDir
-		CustomRecord(GPastEntrySelected, GPastEntries)
-	}
-
 Return
 
 SubjectsManagement:
 	GSubject:="null"
 	Run, %GEditor% %GConf%
 Return
+
+ProjectsManagement:
+	GProjectSelected := A_WorkingDir
+	Run, %GEditor% %GConf%
+Return
+
+GuiHide:
+	Gui, hide
+return
 
 ;___________________________________________
 ;_____Hotkey Section________________________
@@ -231,10 +257,6 @@ Return
 	}
 Return
 
-GuiHide:
-	Gui, hide
-return
-
 ;___________________________________________
 ;_____Function Section______________________
 
@@ -262,27 +284,30 @@ CustomGetPath()
 	global Gtitle
 	global GPastEntries
 	global GPastEntrySelected
+	global GProjectSelected
 	GPastEntrySelected := 
+	GProjectSelected :=
 	gosub, GuiHide
-	if ("null" = CustomSetValueViaGui("DateGui", GMyDateTime))
-		Return %A_WorkingDir%
+	if ("null" = CustomSetValueViaGui("MixGui", GMyDateTime))
+		Return CustomRecord(A_WorkingDir, GPastEntries)
 	if ("" != GPastEntrySelected)
-		Return %GPastEntrySelected%
+		Return CustomRecord(GPastEntrySelected, GPastEntries)
+	if ("" != GProjectSelected)
+		Return  CustomRecord(GProjectSelected, GPastEntries)
 	if ("null" = CustomSetValueViaGui("SubjectGui", GSubject))
-		Return %A_WorkingDir%
+		Return CustomRecord(A_WorkingDir, GPastEntries)
 	CustomSetValueViaGui("TitleGui", Gtitle)
 	arr := [ A_WorkingDir, SubStr(GMyDateTime, 1, 6), SubStr(GMyDateTime, 5, 4), GSubject, Gtitle]
 	path := Format("{}\{}\{}.{}.{}", arr*)
 	If !FileExist(path)
 		FileCreateDir, %path%
-	CustomRecord(path, GPastEntries)
-	Return path
+	Return CustomRecord(path, GPastEntries)
 }
 
 CustomRecord(ByRef path, ByRef arr)
 {
 	arr[path] := A_Now
-	Return
+	Return path
 }
 
 CustomGetLatestRecord(ByRef arr)
