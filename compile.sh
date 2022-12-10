@@ -1,1 +1,1 @@
-g++ -I common *.cpp -lcurl
+g++ -I common/include -lcurl common/src/*.cpp *.cpp 

@@ -1,61 +1,6 @@
 #include "entity.h"
-#include <vector>
-#include <tuple>
-#include <cassert>
-#include "common/tools.h"
-
-class Draft
-{
-    private:
-    public:
-        long size;
-        std::vector<std::tuple <void *, int>> content;
-        void write(void* el, long len);
-        char* confirm();
-        Draft(void* el, long len);
-        Draft();
-        ~Draft();
-};
-
-Draft::Draft(void* el, long len):size(0)
-{
-    this->size += len;
-    content.push_back(std::tuple <void *, int>(el, len));
-}
-
-Draft::Draft():size(0)
-{   
-}
-
-Draft::~Draft()
-{   
-}
-
-void Draft::write(void* el, long len)
-{
-    this->size += len;
-    content.push_back(std::tuple <void *, int>(el, len));
-}
-
-char* Draft::confirm()
-{
-    long size = 0;
-    for (std::vector<std::tuple <void *, int>>::iterator it = content.begin() ; it != content.end(); ++it)
-    {
-        size += std::get<1>(*it);
-    }
-    assert(size == this->size);
-    
-    char *mail = (char *) malloc(size);
-    long position = 0;
-    for (auto it = content.begin(); it != content.end(); ++it)
-    {
-        memcpy(mail+position, std::get<0>(*it), std::get<1>(*it));
-        position += std::get<1>(*it); 
-    }
-
-    return mail;
-}
+#include "tools.h"
+#include "draft.h"
 
 long malloc_and_set_mail(char ** mail, long * size, struct options_t * options)
 {
@@ -135,10 +80,10 @@ long malloc_and_set_mail(char ** mail, long * size, struct options_t * options)
     sprintf(file_header, file_header_format, options->file_name);
     draft.write((void *)file_header, strlen(file_header));
 
-    unsigned int file_size = 0;
-    char * file_context = 0;
-    MALLOC_AND_SET_DATA_FROM_THE_FILE(file_context, file_size, options->file_name_64);
-    draft.write((void *)file_context, file_size);
+    long attachment_size = 0;
+    char * attachment = 0;
+    MALLOC_AND_SET_BASE64_DATA_FROM_THE_FILE(attachment, attachment_size, options->file_name);
+    draft.write((void *)attachment, attachment_size);
 
     const char * tail =
     "--simple boundary\r\n"
@@ -148,34 +93,33 @@ long malloc_and_set_mail(char ** mail, long * size, struct options_t * options)
     *mail = draft.confirm();
     *size = draft.size;
 
-    FREE(file_context);
+    FREE(attachment);
     return *size;
 }
 
 int main (int argc,char **argv) 
 {
-    if (argc<12)
+    if (argc<11)
     {
-        printf("Usage: %s SUBJECT CONTENT_HEADER CONTENT_BODY FILE FILE_64 EMAIL_URL EMAIL_USER EMAIL_PASS FROM TO CC MESSAGE_ID\n", argv[0]);
+        printf("Usage: %s SUBJECT CONTENT_HEADER CONTENT_BODY ATTACHMENT EMAIL_URL EMAIL_USER EMAIL_PASS FROM TO CC MESSAGE_ID\n", argv[0]);
         return 1;
     }
 
     struct curl_slist *recipients = NULL;
-    recipients = curl_slist_append(recipients, argv[10]);
-    if ( strlen(argv[11])>0 ) recipients = curl_slist_append(recipients, argv[11]);
+    recipients = curl_slist_append(recipients, argv[9]);
+    if ( strlen(argv[10])>0 ) recipients = curl_slist_append(recipients, argv[10]);
 
     struct options_t options = {
     .subject = argv[1],
     .body_text_head = argv[2],
     .body_text_body = argv[3],
     .file_name = argv[4],
-    .file_name_64 = argv[5],
-    .url = argv[6],
-    .username = argv[7],
-    .password = argv[8],
-    .from = argv[9],
+    .url = argv[5],
+    .username = argv[6],
+    .password = argv[7],
+    .from = argv[8],
     .recipients = recipients,
-    .message_id = argv[12]
+    .message_id = argv[11]
     };
     
     char * mail = 0;
