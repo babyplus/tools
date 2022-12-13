@@ -1,5 +1,9 @@
 #ifndef BASE64
 #define BASE64
+#include <cstring>
+#include <cstdint>
+#include <cstdio>
+
 #define BASE64_24BITS_LEN 3
 #define BASE64_SET_OUTPUT_LEN(OUT_LEN, COUNT_24B_GROUPS, FINAL_TYPE) OUT_LEN = 4 * COUNT_24B_GROUPS + (FINAL_TYPE ? 5 : 1);
 #define ALL_1_BITS(x) ((1 << x) - 1)

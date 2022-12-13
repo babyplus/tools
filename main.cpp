@@ -82,7 +82,8 @@ long malloc_and_set_mail(char ** mail, long * size, struct options_t * options)
 
     long attachment_size = 0;
     char * attachment = 0;
-    MALLOC_AND_SET_BASE64_DATA_FROM_THE_FILE(attachment, attachment_size, options->file_name);
+    char buffer[6] = {0};
+    MALLOC_AND_SET_BASE64_DATA_FROM_THE_FILE_WITH_BUFFER(attachment, attachment_size, options->file_name, buffer);
     draft.write((void *)attachment, attachment_size);
 
     const char * tail =
