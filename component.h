@@ -1,6 +1,5 @@
 #ifndef __COMPONENT__
 #define __COMPONENT__
-#include "tracker.h"
 
 class Component
 {

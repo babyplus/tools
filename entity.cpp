@@ -76,7 +76,6 @@ size_t Entity::payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
 void mail_sender(const void* data, long data_len, struct options_t * options)
 {
-    //TRACK("%s", data);
     CURL *curl;
     CURLcode res = CURLE_OK;
     struct upload_status upload_ctx = { 
