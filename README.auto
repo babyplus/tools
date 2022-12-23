@@ -1,4 +1,4 @@
 echo '# Branches' > README.md
 echo >> README.md
-git branch -a | grep -E '^  remotes/origin/' | grep -E 'CXX_|python_|bash_|C_' | sed 's#  remotes/origin/##g' | awk '{print "*  ["$1"](../../tree/"$1")"}' >> README.md
+git branch -a | grep -E '^  remotes/origin/' | grep -E 'CXX_|python_|bash_|C_|node_|ahk_' | sed 's#  remotes/origin/##g' | awk '{print "*  ["$1"](../../tree/"$1")"}' >> README.md
 echo >> README.md
