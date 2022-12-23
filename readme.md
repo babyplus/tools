@@ -1,6 +1,6 @@
 ## Usage 
 
-sbs *device* *dst_mac* *message* *[src_mac]*
+packet_sender *device* *dst_mac* *message* *[src_mac]*
 
 ## Example 
 
@@ -13,13 +13,13 @@ sbs *device* *dst_mac* *message* *[src_mac]*
 in node1:
 
 ```
-root@plus:~# git clone https://github.com/babyplus/send_by_string.git
+root@plus:~# git clone https://github.com/babyplus/tools.git
 
-root@plus:~# cd send_by_string
+root@plus:~# cd tools && git checkout remotes/origin/C_packet_sender -b C_packet_sender
 
-root@plus:~/send_by_string# gcc send_by_string.c -o sbs
+root@plus:~/tools# gcc main.c -o packet_sender
 
-root@plus:~/send_by_string# ./sbs enp0s8 "01:80:c2:00:00:34" "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02"
+root@plus:~/tools# ./packet_sender enp0s8 "01:80:c2:00:00:34" "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02"
 08:00:27:d2:31:15
 Index for interface enp0s8 is 3 
 01:80:c2:00:00:34

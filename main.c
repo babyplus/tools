@@ -78,7 +78,7 @@ int _count_char_of_hex(char * data_str, int * p_hex_num)
 int  main( int argc, char** argv ) 
 {
 	 /*
-	 * root@plus:~/C# gcc send_by_string.c && ./a.out enp0s3 "01:80:c2:00:00:36" "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02"
+	 * root@plus:~/C# gcc main.c && ./a.out enp0s3 "01:80:c2:00:00:36" "8100 2002 | 8902 | 8005 | 80 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02"
 	 * 
 	 */
 	uint8_t tmp_data[] = {};

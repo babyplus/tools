@@ -1,7 +1,7 @@
 file=${1:-wireshark_example.txt}
 interface=${2:-enp0s8}
 
-gcc send_by_string.c -o sbs
+gcc main.c -o packet_sender
 
 [[ $1 == "-h" ]] && {
   echo "Usage: $0 [file] [interface]"
@@ -22,4 +22,4 @@ echo $src
 echo $dst
 echo $data
 
-./sbs $interface $dst $data $src
+./packet_sender $interface $dst $data $src
