@@ -3,6 +3,9 @@
 GMouseDelay := 20
 #SingleInstance
 
+;;;;;;;;;;;;;;;;;;;
+;; global values ;;
+;;;;;;;;;;;;;;;;;;;
 GPastEntries := []
 GPastEntriesEx := []
 GPastEntrySelected := ""
@@ -18,8 +21,11 @@ GMenuItems := IniRead(GConf, "items")
 GProjects := IniRead(GConf, "projects")
 if FileExist(GIcon)
 	TraySetIcon GIcon
-
 GLatestModTimestamps := Map()
+
+;;;;;;;;;;;;
+;; Reload ;;
+;;;;;;;;;;;;
 if "True" = GDevMode
 {
 	DevFocuses := ["main.ahk", "config.ini", "icon.png"]
@@ -46,31 +52,55 @@ if "True" = GDevMode
 }
 Exit
 
-main()
+get_path()
 {
-	MenuItems := Map()
-	ItemsGui := Gui()
-	Loop parse, GMenuItems, "`n`r"
-		ItemsGui.Add("Button", "w260 h30", A_LoopField)
-	ItemsGui.Show("xCenter y0")
+	return A_WorkingDir
+}
+
+item_click(params*)
+{
+	params[1].Gui.Hide()
+	switch params[1].Text {
+		case "计算器":
+			Run("Calc")
+		case "Cmd":
+			path := get_path()
+			Run("cmd /s /k cd " path)
+		default:
+			Msgbox "undefine"
+	}
 	Return
 }
 
-; ~MButton::
-; {
-; 	duration := 0
-; 	Loop
-; 	{
-; 		duration += 1
-; 		Sleep 10
-;         if !GetKeyState("MButton", "P")
-;             break
-; 	}
-;     if duration < GMouseDelay
-;         Return
-; 	main
-;     Return
-; }
+
+main()
+{
+	xpos := 0
+	ypos := 0
+	ItemsGui := Gui()
+	Loop parse, GMenuItems, "`n`r"
+		ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", item_click)
+	MouseGetPos &xpos, &ypos
+	ItemsGui.Show("x" xpos " y" ypos)
+	SetTimer(()=>(ItemsGui.Hide()), -5000)
+	Return
+}
+
+~MButton::
+{
+	duration := 0
+	Loop
+	{
+		duration += 1
+		Sleep 10
+        if !GetKeyState("MButton", "P")
+            break
+	}
+    if duration < GMouseDelay
+        Return
+	main
+    Return
+}
 
 ; ~WheelLeft::
 ; {
