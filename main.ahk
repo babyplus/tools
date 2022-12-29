@@ -21,13 +21,14 @@ GEditor := IniRead(GConf, "default", "editor", "notepad")
 GIcon := IniRead(GConf, "default", "icon", "icon.png")
 GReloadMode := IniRead(GConf, "default", "reload", "Flase")
 GGitBash := IniRead(GConf, "default", "git", null)
+GTimeout := IniRead(GConf, "default", "timeout", 5000)
 GMenuItems := IniRead(GConf, "items")
 GSubjects := IniRead(GConf, "subjects")
 if FileExist(GIcon)
 	TraySetIcon GIcon
 GLatestModTimestamps := Map()
 GGuiComOpt := "-Caption +AlwaysOnTop +LastFound"
-GGuiUniTitle := "shortcuts"
+GGuiUniTitle := "shortcuts_" A_NowUTC
 
 ;;;;;;;;;;;;
 ;; Reload ;;
@@ -272,6 +273,7 @@ itemClick(params*)
 main()
 {
 	global GGuiUniTitle
+	global GTimeout
 	if not WinExist(GGuiUniTitle)
 	{
 		ItemsGui := Gui(GGuiComOpt, GGuiUniTitle)
@@ -280,7 +282,7 @@ main()
 			ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
 		MouseGetPos &xpos, &ypos
 		ItemsGui.Show("x" xpos " y" ypos)
-		SetTimer(()=>(ItemsGui.Destroy()), -5000)
+		SetTimer(()=>(ItemsGui.Destroy()), -GTimeout)
 	}
 	Return
 }
