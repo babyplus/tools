@@ -1,11 +1,10 @@
-﻿#Requires AutoHotkey v2.0-beta
-
-GMouseDelay := 20
-#SingleInstance
+﻿#Requires AutoHotkey v2.0
 
 ;;;;;;;;;;;;;;;;;;;
 ;; global values ;;
 ;;;;;;;;;;;;;;;;;;;
+undefined := "undefined"
+null := ""
 types := {
 	Undefined: 0,
 	DateTime: 1,
@@ -14,41 +13,47 @@ types := {
 	History: 4,
 	Ingnore: 99,
 }
+GMouseDelay := 20
 GPastEntries := Map()
 GPastEntriesSorted := []
 GConf := "config.ini"
 GEditor := IniRead(GConf, "default", "editor", "notepad")
 GIcon := IniRead(GConf, "default", "icon", "icon.png")
-GDevMode := IniRead(GConf, "default", "dev", "Flase")
-GGitBash := IniRead(GConf, "default", "git", "")
+GReloadMode := IniRead(GConf, "default", "reload", "Flase")
+GGitBash := IniRead(GConf, "default", "git", null)
 GMenuItems := IniRead(GConf, "items")
 GSubjects := IniRead(GConf, "subjects")
 if FileExist(GIcon)
 	TraySetIcon GIcon
 GLatestModTimestamps := Map()
+GGuiComOpt := "-Caption +AlwaysOnTop +LastFound"
 
 ;;;;;;;;;;;;
 ;; Reload ;;
 ;;;;;;;;;;;;
-if "True" = GDevMode
+if "True" = GReloadMode
 {
-	DevFocuses := ["main.ahk", "config.ini", "icon.png"]
-	for _, DevFocus in DevFocuses
+	focuses := ["main.ahk", "config.ini", "icon.png"]
+	for _, focus in focuses
 	{
-		ModTimestamp := FileGetTime(DevFocus, "M")
-		GLatestModTimestamps[DevFocus] := ModTimestamp
+		If !FileExist(focus)
+			continue
+		ModTimestamp := FileGetTime(focus, "M")
+		GLatestModTimestamps[focus] := ModTimestamp
 	}
 	loop
 	{
-		for _, DevFocus in DevFocuses
+		for _, focus in focuses
 		{
-            ModTimestamp := FileGetTime(DevFocus, "M")
-			if GLatestModTimestamps[DevFocus] != ModTimestamp
+			If !FileExist(focus)
+				continue
+			ModTimestamp := FileGetTime(focus, "M")
+			if GLatestModTimestamps[focus] != ModTimestamp
 			{
-				if "Yes" == Msgbox("重新加载？", "", 36)
+				if "Yes" == Msgbox("检测到文件有变化，是否重新加载程序？", null, 36)
 					Reload
 				else
-					GLatestModTimestamps[DevFocus] := ModTimestamp
+					GLatestModTimestamps[focus] := ModTimestamp
 			}
 		}
 		sleep 3
@@ -79,13 +84,13 @@ setSubject(&subject)
 {
 	variable := {
 		type: types.Undefined,
-		val: ""
+		val: null
 	}
-	subjectGui := Gui()
+	subjectGui := Gui(GGuiComOpt)
 	arr := []
 	Loop parse, GSubjects, "`n`r"
 		arr.Push(A_LoopField)
-	subjectGui.Add("DropDownList", , arr)
+	subjectGui.Add("DropDownList", "w160", arr)
 	.OnEvent("change", (_*)=>(variable.type := types.Ingnore, subject := arr[_[1].value]))
 	setValueViaGui(&variable, &subjectGui)
 }
@@ -94,12 +99,12 @@ setTitle(&title)
 {
 	variable := {
 		type: types.Undefined,
-		val: ""
+		val: null
 	}
-	titleGui := Gui()
-	titleGui.Add("Edit", "w160 r9 vContent", "今日记录")
+	titleGui := Gui(GGuiComOpt)
+	titleGui.Add("Edit", "w160 r10 vContent", "今日记录")
 	titleGui.Add("Button",  "w80", "确定")
-	.OnEvent("click", (_*)=>(variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", "")))
+	.OnEvent("click", (_*)=>(variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)))
 	setValueViaGui(&variable, &titleGui)
 }
 
@@ -114,9 +119,11 @@ setCustomPath(&path, &variable)
 	projects := []
 	Loop parse, IniRead(GConf, "projects"), "`n`r"
 		projects.Push(A_LoopField)
-	projectsGui := Gui()
+	projectsGui := Gui(GGuiComOpt)
 	projectsGui.Add("ListBox", "r20 w800", projects)
-	.OnEvent("change", (_*)=>(variable.type := types.Ingnore, path := projects[_[1].value]))
+	.OnEvent("change", (_*)=>(
+		_[1].value ? variable.type := types.Ingnore path := projects[_[1].value] : path := null
+	))
 	setValueViaGui(&variable, &projectsGui)
 }
 
@@ -125,9 +132,11 @@ selectHistoryEntry(&path, &variable)
 	global GPastEntriesSorted
 	if GPastEntriesSorted.Length
 	{
-		pastEntriesGui := Gui()
+		pastEntriesGui := Gui(GGuiComOpt)
 		pastEntriesGui.Add("ListBox", "r20 w800", GPastEntriesSorted)
-		.OnEvent("change", (_*)=>(variable.type := types.Ingnore, path := GPastEntriesSorted[_[1].value]))
+		.OnEvent("change", (_*)=>(
+			_[1].value ? variable.type := types.Ingnore path := GPastEntriesSorted[_[1].value] : path := null
+		))
 		setValueViaGui(&variable, &pastEntriesGui)
 	} else {
 		path := A_WorkingDir
@@ -152,7 +161,7 @@ sortEntries(entries)
 {
 	global GPastEntriesSorted
 	pastEntriesEx := Map()
-	moments := ""
+	moments := null
 	for k,v in GPastEntries
 		pastEntriesEx[v] := k
 	for k,v in pastEntriesEx
@@ -169,14 +178,11 @@ getPath()
 	global GPastEntries
 	variable := {
 		type: types.Undefined,
-		val: ""
+		val: null
 	}
-	path := ""
-	ex := Map()
-	subject := ""
-	title := ""
+	path := null
 
-	mixGui := Gui()
+	mixGui := Gui(GGuiComOpt)
 	mixGui.Add("DateTime", "w220 y10", "yyyy-MM-dd")
 	.OnEvent("Change", (_*)=>(variable.type := types.DateTime, variable.val := _[1].value))
 	mixGui.Add("Button", "x+10 y10", "今日")
@@ -190,10 +196,10 @@ getPath()
 	mixGui.Add("Button", "x+10", "历史")
 	.OnEvent("click", (_*)=>(variable.type := types.History))
 
-	switch setValueViaGui(&variable, &mixGui).type {
+	switch setValueViaGui(&variable, &mixGui).type
+	{
 		case types.DateTime:
-			setSubject(&subject), setTitle(&title), path := splicePath(variable, subject, title),
-			ex.subject := subject, ex.title := title, ex.time := variable.val
+			setSubject(&subject), setTitle(&title), path := splicePath(variable, subject, title)
 		case types.Custom:
 			setCustomPath(&path, &variable)
 		case types.History:
@@ -203,52 +209,62 @@ getPath()
 		default:
 	}
 	
-	path := "" == path ? A_WorkingDir : path
+	path := null == path ? A_WorkingDir : path
 	record(path, &GPastEntries, sortEntries)
 	If !FileExist(path)
 		DirCreate path
-	return {path: path, ex: ex}
+	return path
 }
 
-editMarkdown(obj)
+editMarkdown(path)
 {
-	path := obj.path
+	title := undefined
+	date := undefined
 	if (A_WorkingDir = path)
 		Return
 	mdFile := path "\README.md"
 	if !FileExist(mdFile)
 	{
-		FileAppend("# " obj.ex.title "  `n", mdFile, "UTF-8")
-		FileAppend("*" obj.ex.time "  `n", mdFile, "UTF-8")
+		Callout(m, *) 
+		{
+			title := m[5], date := m[1] m[3]
+		}
+		if RegExMatch(path, "([0-9]{6})\\([0-9]{2})([0-9]{2})\.(.*)\.(.*)$(?CCallout)")
+		{
+			FileAppend("# " title "  `n", mdFile, "UTF-8")
+			FileAppend("*" date "  `n", mdFile, "UTF-8")
+		} else {
+			FileAppend("# " A_Now "  `n", mdFile, "UTF-8")
+		}
 	}
 	Run(GEditor " " mdFile)
 }
 
-item_click(params*)
+itemClick(params*)
 {
 	params[1].Gui.Hide()
 	switch params[1].Text 
 	{
 		case "计算器":
-			Run("Calc")
+			Run "Calc"
 		case "打开文件夹":
-			Run("explorer " getPath().path)
+			Run "explorer " getPath()
 		case "复制window风格路径":
-			A_Clipboard := getPath().path
-		case "复制Linux风格路径":
-			A_Clipboard := StrReplace(getPath().path, "\", "/")
+			A_Clipboard := getPath()
 		case "复制双反斜杠路径":
-			A_Clipboard := StrReplace(getPath().path, "\", "\\")
+			A_Clipboard := StrReplace(getPath(), "\", "\\")
+		case "复制Linux风格路径":
+			A_Clipboard := StrReplace(getPath(), "\", "/")
 		case "打开README.md":
-			editMarkdown(getPath())
+			editMarkdown getPath()
 		case "Cmd":
-			Run("cmd /s /k cd " getPath().path)
+			Run "cmd /s /k cd " getPath()
 		case "Git bash":
-			Run(GGitBash " --cd=" getPath().path)
+			Run GGitBash " --cd=" getPath()
 		case "重新加载程序":
 			Reload
 		default:
-			Msgbox "undefine"
+			Msgbox undefined
 	}
 	Return
 }
@@ -257,12 +273,13 @@ main()
 {
 	xpos := 0
 	ypos := 0
-	ItemsGui := Gui()
+	ItemsGui := Gui(GGuiComOpt)
+	ItemsGui.MarginX := ItemsGui.MarginY := 0
 	Loop parse, GMenuItems, "`n`r"
-		ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", item_click)
+		ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
 	MouseGetPos &xpos, &ypos
 	ItemsGui.Show("x" xpos " y" ypos)
-	SetTimer(()=>(ItemsGui.Hide()), -5000)
+	SetTimer(()=>(ItemsGui.Destroy()), -5000)
 	Return
 }
 
@@ -278,7 +295,7 @@ main()
 	}
     if duration < GMouseDelay
         Return
-	main
+    main
     Return
 }
 
