@@ -27,6 +27,7 @@ if FileExist(GIcon)
 	TraySetIcon GIcon
 GLatestModTimestamps := Map()
 GGuiComOpt := "-Caption +AlwaysOnTop +LastFound"
+GGuiUniTitle := "shortcuts"
 
 ;;;;;;;;;;;;
 ;; Reload ;;
@@ -86,7 +87,7 @@ setSubject(&subject)
 		type: types.Undefined,
 		val: null
 	}
-	subjectGui := Gui(GGuiComOpt)
+	subjectGui := Gui(GGuiComOpt, GGuiUniTitle)
 	arr := []
 	Loop parse, GSubjects, "`n`r"
 		arr.Push(A_LoopField)
@@ -101,7 +102,7 @@ setTitle(&title)
 		type: types.Undefined,
 		val: null
 	}
-	titleGui := Gui(GGuiComOpt)
+	titleGui := Gui(GGuiComOpt, GGuiUniTitle)
 	titleGui.Add("Edit", "w160 r10 vContent", "今日记录")
 	titleGui.Add("Button",  "w80", "确定")
 	.OnEvent("click", (_*)=>(variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)))
@@ -119,7 +120,7 @@ setCustomPath(&path, &variable)
 	projects := []
 	Loop parse, IniRead(GConf, "projects"), "`n`r"
 		projects.Push(A_LoopField)
-	projectsGui := Gui(GGuiComOpt)
+	projectsGui := Gui(GGuiComOpt, GGuiUniTitle)
 	projectsGui.Add("ListBox", "r20 w800", projects)
 	.OnEvent("change", (_*)=>(
 		_[1].value ? variable.type := types.Ingnore path := projects[_[1].value] : path := null
@@ -132,7 +133,7 @@ selectHistoryEntry(&path, &variable)
 	global GPastEntriesSorted
 	if GPastEntriesSorted.Length
 	{
-		pastEntriesGui := Gui(GGuiComOpt)
+		pastEntriesGui := Gui(GGuiComOpt, GGuiUniTitle)
 		pastEntriesGui.Add("ListBox", "r20 w800", GPastEntriesSorted)
 		.OnEvent("change", (_*)=>(
 			_[1].value ? variable.type := types.Ingnore path := GPastEntriesSorted[_[1].value] : path := null
@@ -182,7 +183,7 @@ getPath()
 	}
 	path := null
 
-	mixGui := Gui(GGuiComOpt)
+	mixGui := Gui(GGuiComOpt, GGuiUniTitle)
 	mixGui.Add("DateTime", "w220 y10", "yyyy-MM-dd")
 	.OnEvent("Change", (_*)=>(variable.type := types.DateTime, variable.val := _[1].value))
 	mixGui.Add("Button", "x+10 y10", "今日")
@@ -218,8 +219,7 @@ getPath()
 
 editMarkdown(path)
 {
-	title := undefined
-	date := undefined
+	title := date := undefined
 	if (A_WorkingDir = path)
 		Return
 	mdFile := path "\README.md"
@@ -271,15 +271,17 @@ itemClick(params*)
 
 main()
 {
-	xpos := 0
-	ypos := 0
-	ItemsGui := Gui(GGuiComOpt)
-	ItemsGui.MarginX := ItemsGui.MarginY := 0
-	Loop parse, GMenuItems, "`n`r"
-		ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
-	MouseGetPos &xpos, &ypos
-	ItemsGui.Show("x" xpos " y" ypos)
-	SetTimer(()=>(ItemsGui.Destroy()), -5000)
+	global GGuiUniTitle
+	if not WinExist(GGuiUniTitle)
+	{
+		ItemsGui := Gui(GGuiComOpt, GGuiUniTitle)
+		ItemsGui.MarginX := ItemsGui.MarginY := xpos := ypos := 0
+		Loop parse, GMenuItems, "`n`r"
+			ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
+		MouseGetPos &xpos, &ypos
+		ItemsGui.Show("x" xpos " y" ypos)
+		SetTimer(()=>(ItemsGui.Destroy()), -5000)
+	}
 	Return
 }
 
