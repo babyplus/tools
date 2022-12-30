@@ -13,6 +13,19 @@ types := {
 	History: 4,
 	Ingnore: 99,
 }
+
+GCapacities := [
+	"计算器",
+	"打开文件夹",
+	"打开README.md",
+	"复制window风格路径",
+	"复制双反斜杠路径",
+	"复制Linux风格路径",
+	"Cmd",
+	"Git bash",
+	"重新加载程序"
+]
+
 GMouseDelay := 20
 GPastEntries := Map()
 GPastEntriesSorted := []
@@ -22,8 +35,11 @@ GIcon := IniRead(GConf, "default", "icon", "icon.png")
 GReloadMode := IniRead(GConf, "default", "reload", "Flase")
 GGitBash := IniRead(GConf, "default", "git", null)
 GTimeout := IniRead(GConf, "default", "timeout", 5000)
+GMButtonStyle := IniRead(GConf, "default", "mButtonStyle", "custom")
+GWheelRLStyle := IniRead(GConf, "default", "wheelRLStyle", "built-in")
 GMenuItems := IniRead(GConf, "items")
 GSubjects := IniRead(GConf, "subjects")
+
 if FileExist(GIcon)
 	TraySetIcon GIcon
 GLatestModTimestamps := Map()
@@ -221,8 +237,6 @@ getPath()
 editMarkdown(path)
 {
 	title := date := undefined
-	if (A_WorkingDir = path)
-		Return
 	mdFile := path "\README.md"
 	if !FileExist(mdFile)
 	{
@@ -235,34 +249,34 @@ editMarkdown(path)
 			FileAppend("# " title "  `n", mdFile, "UTF-8")
 			FileAppend("*" date "  `n", mdFile, "UTF-8")
 		} else {
-			FileAppend("# " A_Now "  `n", mdFile, "UTF-8")
+			FileAppend("# 待编辑  `n", mdFile, "UTF-8")
 		}
 	}
 	Run(GEditor " " mdFile)
 }
 
-itemClick(params*)
+shunt(c)
 {
-	params[1].Gui.Hide()
-	switch params[1].Text 
-	{
-		case "计算器":
+	global GCapacities
+	index := 1
+	switch  c {
+		case GCapacities[index++]:
 			Run "Calc"
-		case "打开文件夹":
-			Run "explorer " getPath()
-		case "复制window风格路径":
-			A_Clipboard := getPath()
-		case "复制双反斜杠路径":
-			A_Clipboard := StrReplace(getPath(), "\", "\\")
-		case "复制Linux风格路径":
-			A_Clipboard := StrReplace(getPath(), "\", "/")
-		case "打开README.md":
+		case GCapacities[index++]:
+			Run "explorer " getPath()                          
+		case GCapacities[index++]:
 			editMarkdown getPath()
-		case "Cmd":
+		case GCapacities[index++]:
+			A_Clipboard := getPath()
+		case GCapacities[index++]:
+			A_Clipboard := StrReplace(getPath(), "\", "\\")
+		case GCapacities[index++]:
+			A_Clipboard := StrReplace(getPath(), "\", "/")
+		case GCapacities[index++]:
 			Run "cmd /s /k cd " getPath()
-		case "Git bash":
+		case GCapacities[index++]:
 			Run GGitBash " --cd=" getPath()
-		case "重新加载程序":
+		case GCapacities[index++]:
 			Reload
 		default:
 			Msgbox undefined
@@ -270,19 +284,63 @@ itemClick(params*)
 	Return
 }
 
-main()
+itemClick(params*)
+{
+	params[1].Gui.Hide()
+	shunt(params[1].Text)
+	Return
+}
+
+menuHandler(Item, *) {
+	shunt(Item)
+	Return
+}
+
+main(args*)
 {
 	global GGuiUniTitle
 	global GTimeout
-	if not WinExist(GGuiUniTitle)
+	global GCapacities
+	switch args[1]
 	{
-		ItemsGui := Gui(GGuiComOpt, GGuiUniTitle)
-		ItemsGui.MarginX := ItemsGui.MarginY := xpos := ypos := 0
-		Loop parse, GMenuItems, "`n`r"
-			ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
-		MouseGetPos &xpos, &ypos
-		ItemsGui.Show("x" xpos " y" ypos)
-		SetTimer(()=>(ItemsGui.Destroy()), -GTimeout)
+		case "custom-gui":
+			if not WinExist(GGuiUniTitle)
+			{
+				ItemsGui := Gui(GGuiComOpt, GGuiUniTitle)
+				ItemsGui.MarginX := ItemsGui.MarginY := xpos := ypos := 0
+				Loop parse, GMenuItems, "`n`r"
+					ItemsGui.Add("Button", "w260 h30", A_LoopField).OnEvent("Click", itemClick)
+				MouseGetPos &xpos, &ypos
+				ItemsGui.Show("x" xpos " y" ypos)
+				SetTimer(()=>(ItemsGui.Destroy()), -GTimeout)
+			}
+		case "custom":
+			MyMenu := Menu()
+			Loop parse, GMenuItems, "`n`r"
+				MyMenu.Add A_LoopField, menuHandler
+			MyMenu.show
+		case "built-in":
+			MyMenu := Menu()
+			index := 1
+			MyMenu.Add GCapacities[index++], menuHandler
+			MyMenu.Add GCapacities[index++], menuHandler
+			MyMenu.Add GCapacities[index++], menuHandler
+			MyMenu.Add
+			Submenu1 := Menu()
+			Submenu1.Add GCapacities[index++], menuHandler
+			Submenu1.Add GCapacities[index++], menuHandler
+			Submenu1.Add GCapacities[index++], menuHandler
+			MyMenu.Add "复制路径", Submenu1
+			MyMenu.Add
+			Submenu2 := Menu()
+			Submenu2.Add GCapacities[index++], menuHandler
+			Submenu2.Add GCapacities[index++], menuHandler
+			MyMenu.Add "命令行界面", Submenu2
+			MyMenu.Add
+			MyMenu.Add GCapacities[index++], menuHandler
+			Mymenu.show
+		default:
+			msgbox "缺少参数"
 	}
 	Return
 }
@@ -299,13 +357,13 @@ main()
 	}
     if duration < GMouseDelay
         Return
-    main
+    main GMButtonStyle
     Return
 }
 
 ~WheelRight::
 ~WheelLeft::
 {
-	main
+	main GWheelRLStyle
 	Return
 }
