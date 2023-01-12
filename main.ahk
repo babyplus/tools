@@ -12,6 +12,7 @@ types := {
     LatestSelected: 3,
     History: 4,
     Ingnore: 99,
+    Exit: 100
 }
 
 GCapacities := [
@@ -203,7 +204,7 @@ sortEntries(entries)
             GPastEntriesSorted.Push(pastEntriesEx[A_LoopField])
 }
 
-getPath()
+selectPathViaGui()
 {
     global GPastEntries
     variable := {
@@ -217,6 +218,8 @@ getPath()
     .OnEvent("Change", (_*)=>(variable.type := types.DateTime, variable.val := _[1].value))
     mixGui.Add("Button", "x+10 y10", "今日")
     .OnEvent("click", (_*)=>(variable.type := types.DateTime, variable.val := A_Now))
+    mixGui.Add("Button", "x+10 y10", "昨日")
+    .OnEvent("click", (_*)=>(variable.type := types.DateTime, variable.val := DateAdd(A_Now, -1, "days")))
     mixGui.Add("Button", "x10 y+10", "默认路径")
     .OnEvent("click", (_*)=>(variable.type := types.Ingnore))
     mixGui.Add("Button", "x+10", "自定义项目")
@@ -225,6 +228,8 @@ getPath()
     .OnEvent("click", (_*)=>(variable.type := types.LatestSelected))
     mixGui.Add("Button", "x+10", "历史")
     .OnEvent("click", (_*)=>(variable.type := types.History))
+    mixGui.Add("Button", "x+10", "关闭")
+    .OnEvent("click", (_*)=>(variable.type := types.Exit))
     
     switch setValueViaGui(&variable, &mixGui).type
     {
@@ -236,6 +241,8 @@ getPath()
              selectHistoryEntry(&path, &variable)
          case types.LatestSelected:
              selectLatestEntry(&path)
+         case types.Exit:
+             return null
          default:
     }
     
@@ -244,6 +251,12 @@ getPath()
     If !FileExist(path)
         DirCreate path
     return path
+}
+
+setPath(&path)
+{
+    path := selectPathViaGui()
+    return null == path ? false : true
 }
 
 editMarkdown(path)
@@ -270,24 +283,32 @@ editMarkdown(path)
 shunt(c)
 {
     global GCapacities
+    path := null
     index := 1
     switch  c {
         case GCapacities[index++]:
-            Run "Calc"
+	    Run "Calc"
         case GCapacities[index++]:
-            Run "explorer " getPath()                          
+            if setPath(&path)
+                Run "explorer " path
         case GCapacities[index++]:
-            editMarkdown getPath()
+            if setPath(&path)
+                editMarkdown path
         case GCapacities[index++]:
-            A_Clipboard := getPath()
+            if setPath(&path)
+                A_Clipboard := path
         case GCapacities[index++]:
-            A_Clipboard := StrReplace(getPath(), "\", "\\")
+            if setPath(&path)
+                A_Clipboard := StrReplace(path, "\", "\\")
         case GCapacities[index++]:
-            A_Clipboard := StrReplace(getPath(), "\", "/")
+            if setPath(&path)
+                A_Clipboard := StrReplace(path, "\", "/")
         case GCapacities[index++]:
-            Run "cmd /s /k cd " getPath()
+            if setPath(&path)
+                Run "cmd /s /k cd " path
         case GCapacities[index++]:
-            Run GGitBash " --cd=" getPath()
+            if setPath(&path)
+                Run GGitBash " --cd=" path
         case GCapacities[index++]:
             Reload
         default:
