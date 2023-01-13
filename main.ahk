@@ -126,12 +126,12 @@ setSubject(&subject)
     setValueViaGui(&variable, &subjectGui)
 }
 
-setTitle(&title, _*)
+setTitle(&variable, &title, _*)
 {
-    variable := {
-        type: types.Undefined,
-        val: null
-    }
+    ; variable := {
+    ;     type: types.Undefined,
+    ;     val: null
+    ; }
     fileList := ""
     titles := []
     Loop Files, A_WorkingDir "\" _[1] "\" _[2] "." _[3] "*", "D"
@@ -147,6 +147,8 @@ setTitle(&title, _*)
     .OnEvent("click", (_*)=>(
         variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)
     ))
+    titleGui.Add("Button", "x+10 w80", "关闭")
+    .OnEvent("click", (_*)=>(variable.type := types.Exit))
     setValueViaGui(&variable, &titleGui)
 }
 
@@ -247,7 +249,8 @@ selectPathViaGui()
          case types.DateTime:
              yearMon := SubStr(variable.val, 1, 6)
              monDay := SubStr(variable.val, 5, 4)
-             setSubject(&subject), setTitle(&title, yearMon, monDay, subject)
+             title := null
+             setSubject(&subject), setTitle(&variable, &title, yearMon, monDay, subject)
              path := splicePath(yearMon, monDay, subject, title)
          case types.Custom:
              setCustomPath(&path, &variable)
@@ -255,10 +258,11 @@ selectPathViaGui()
              selectHistoryEntry(&path, &variable)
          case types.LatestSelected:
              selectLatestEntry(&path)
-         case types.Exit:
-             return null
          default:
     }
+
+    if types.Exit == variable.type
+        return null
     
     path := null == path ? A_WorkingDir : path
     record(path, &GPastEntries, sortEntries)
