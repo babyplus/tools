@@ -126,22 +126,33 @@ setSubject(&subject)
     setValueViaGui(&variable, &subjectGui)
 }
 
-setTitle(&title)
+setTitle(&title, _*)
 {
     variable := {
         type: types.Undefined,
         val: null
     }
+    fileList := ""
+    titles := []
+    Loop Files, A_WorkingDir "\" _[1] "\" _[2] "." _[3] "*", "D"
+        fileList .= StrReplace(A_LoopFileName, _[2] "." _[3] ".", null) "`n"
+    Loop Parse, fileList, "`n"
+        if A_LoopField
+            titles.push(A_LoopField)
     titleGui := Gui(GGuiComOpt, GGuiUniTitle)
-    titleGui.Add("Edit", "w160 r10 vContent", "今日记录")
-    titleGui.Add("Button",  "w80", "确定")
-    .OnEvent("click", (_*)=>(variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)))
+    titleGui.Add("Edit", "w160 h200 vContent", "今日记录")
+    titleGui.Add("ListBox", "w160 h200 x+10 vTitle", titles)
+    .OnEvent("change", (_*)=>(variable.type := types.Ingnore, title := titles[_[1].Gui["Title"].value]))
+    titleGui.Add("Button", "x10 w80", "确定")
+    .OnEvent("click", (_*)=>(
+        variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)
+    ))
     setValueViaGui(&variable, &titleGui)
 }
 
-splicePath(variable, _*)
+splicePath(_*)
 {
-    arr := [A_WorkingDir, SubStr(variable.val, 1, 6), SubStr(variable.val, 5, 4), _[1], _[2]]
+    arr := [A_WorkingDir,  _[1], _[2], _[3], _[4]]
     return Format("{}\{}\{}.{}.{}", arr*)
 }
 
@@ -234,7 +245,10 @@ selectPathViaGui()
     switch setValueViaGui(&variable, &mixGui).type
     {
          case types.DateTime:
-             setSubject(&subject), setTitle(&title), path := splicePath(variable, subject, title)
+             yearMon := SubStr(variable.val, 1, 6)
+             monDay := SubStr(variable.val, 5, 4)
+             setSubject(&subject), setTitle(&title, yearMon, monDay, subject)
+             path := splicePath(yearMon, monDay, subject, title)
          case types.Custom:
              setCustomPath(&path, &variable)
          case types.History:
