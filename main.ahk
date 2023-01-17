@@ -30,6 +30,7 @@ GCapacities := [
 GMouseDelay := 20
 GPastEntries := Map()
 GPastEntriesSorted := []
+GHotkeysMap := Map()
 GConf := "config.ini"
 GEditor := IniRead(GConf, "default", "editor", "notepad")
 GIcon := IniRead(GConf, "default", "icon", "icon.png")
@@ -41,6 +42,7 @@ GKeysMenuStyle := IniRead(GConf, "default", "keys_menu", "built-in")
 GCustomItems := IniRead(GConf, "custom-items")
 GSubjects := IniRead(GConf, "subjects")
 GCustomGuiButton := IniRead(GConf, "custom-gui", "button", "w260 h30")
+GHotkeys := IniRead(GConf, "hotkeys")
 
 if FileExist(GIcon)
     TraySetIcon GIcon
@@ -57,6 +59,7 @@ Loop parse, GKeysMenu, "`n`r"
     Hotkey A_LoopField, keysMenu
 Loop parse, GKeysMenuDelay, "`n`r"
     Hotkey A_LoopField, keysMenuDelay
+hotkeys
 
 
 ;;;;;;;;;;;;
@@ -128,10 +131,6 @@ setSubject(&subject)
 
 setTitle(&variable, &title, _*)
 {
-    ; variable := {
-    ;     type: types.Undefined,
-    ;     val: null
-    ; }
     fileList := ""
     titles := []
     Loop Files, A_WorkingDir "\" _[1] "\" _[2] "." _[3] "*", "D"
@@ -420,4 +419,16 @@ keysMenu(args*)
 {
     main GKeysMenuStyle
     Return
+}
+
+hotkeys()
+{
+    global GHotkeys
+    global GHotkeysMap
+    Loop parse, GHotkeys, "`n`r"
+    {
+        kv := StrSplit(A_LoopField, "=")
+        GHotkeysMap[kv[1]] := kv[2]
+        hotkey kv[1], (_)=>(send(GHotkeysMap[_]))
+    }
 }
