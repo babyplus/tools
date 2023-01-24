@@ -114,26 +114,46 @@ setValueViaGui(&variable, &inputGui)
     Return
 }
 
-setSubject(&subject)
+elof(el, els)
 {
-    variable := {
-        type: types.Undefined,
-        val: null
-    }
-    subjectGui := Gui(GGuiComOpt, GGuiUniTitle)
+    for k,v in els
+        if ! StrCompare(el, v)
+            return false
+    return true
+}
+
+setSubject(&variable, &subject, _*)
+{
+    global GSubjects, GGuiComOpt, GGuiUniTitle 
+    fileList := ""
     arr := []
     Loop parse, GSubjects, "`n`r"
         arr.Push(A_LoopField)
-    subjectGui.Add("DropDownList", "w160", arr)
+    Loop Files, A_WorkingDir "\" _[1] "\" _[2] ".*", "D"
+    {
+        temp := StrReplace(A_LoopFileName, _[2] ".", null)
+        fileList .= Substr(temp, 1, Instr(temp, '.')-1) "`n"
+    }
+    Loop parse, fileList, "`n`r"
+        if A_LoopField and elof(A_LoopField, arr)
+            arr.Push(A_LoopField)
+    subjectGui := Gui(GGuiComOpt, GGuiUniTitle)
+    subjectGui.Add("DropDownList", "y10 w180", arr)
     .OnEvent("change", (_*)=>(variable.type := types.Ingnore, subject := arr[_[1].value]))
+    subjectGui.Add("Edit", "w80 x+10 vContent", "新临时分类")
+    subjectGui.Add("Button", "x+10 w80", "确定")
+    .OnEvent("click", (_*)=>(
+        variable.type := types.Ingnore, subject := StrReplace(_[1].Gui["Content"].value, "`n", null)
+    ))
     setValueViaGui(&variable, &subjectGui)
 }
 
 setTitle(&variable, &title, _*)
 {
+    global GuiComOpt, GGuiUniTitle 
     fileList := ""
     titles := []
-    Loop Files, A_WorkingDir "\" _[1] "\" _[2] "." _[3] "*", "D"
+    Loop Files, A_WorkingDir "\" _[1] "\" _[2] "." _[3] ".*", "D"
         fileList .= StrReplace(A_LoopFileName, _[2] "." _[3] ".", null) "`n"
     Loop Parse, fileList, "`n"
         if A_LoopField
@@ -159,6 +179,7 @@ splicePath(_*)
 
 setCustomPath(&path, &variable)
 {
+    global GuiComOpt, GGuiUniTitle 
     projects := []
     Loop parse, IniRead(GConf, "projects"), "`n`r"
         projects.Push(A_LoopField)
@@ -172,7 +193,7 @@ setCustomPath(&path, &variable)
 
 selectHistoryEntry(&path, &variable)
 {
-    global GPastEntriesSorted
+    global GPastEntriesSorted, GGuiComOpt, GGuiUniTitle 
     if GPastEntriesSorted.Length
     {
         pastEntriesGui := Gui(GGuiComOpt, GGuiUniTitle)
@@ -202,7 +223,7 @@ record(value, &entries, cb*)
 
 sortEntries(entries)
 {
-    global GPastEntriesSorted
+    global GPastEntriesSorted, GPastEntries
     pastEntriesEx := Map()
     moments := null
     for k,v in GPastEntries
@@ -218,7 +239,7 @@ sortEntries(entries)
 
 selectPathViaGui()
 {
-    global GPastEntries
+    global GPastEntries, GGuiComOpt, GGuiUniTitle
     variable := {
         type: types.Undefined,
         val: null
@@ -249,7 +270,8 @@ selectPathViaGui()
              yearMon := SubStr(variable.val, 1, 6)
              monDay := SubStr(variable.val, 5, 4)
              title := null
-             setSubject(&subject), setTitle(&variable, &title, yearMon, monDay, subject)
+             setSubject(&variable, &subject, yearMon, monDay)
+             setTitle(&variable, &title, yearMon, monDay, subject)
              path := splicePath(yearMon, monDay, subject, title)
          case types.Custom:
              setCustomPath(&path, &variable)
@@ -349,11 +371,7 @@ menuHandler(Item, *)
 
 main(args*)
 {
-    global GGuiUniTitle
-    global GTimeout
-    global GCapacities
-    global GCustomItems
-    global GCustomGuiButton
+    global GGuiComOpt,GGuiUniTitle, GTimeout, GCapacities, GCustomItems, GCustomGuiButton
     switch args[1]
     {
         case "custom-gui":
@@ -400,6 +418,7 @@ main(args*)
 
 keysMenuDelay(args*)
 {
+    global GMouseDelay, GKeysMenuDelayStyle
     key := RegExReplace(args[1], "[^a-zA-Z\d]", null)
     duration := 0
     Loop
@@ -417,14 +436,14 @@ keysMenuDelay(args*)
 
 keysMenu(args*)
 {
+    global GKeysMenuStyle
     main GKeysMenuStyle
     Return
 }
 
 hotkeys()
 {
-    global GHotkeys
-    global GHotkeysMap
+    global GHotkeys, GHotkeysMap
     Loop parse, GHotkeys, "`n`r"
     {
         kv := StrSplit(A_LoopField, "=")
