@@ -19,6 +19,7 @@ GCapacities := [
     "计算器",
     "打开文件夹",
     "打开README.md",
+    "自定义脚本",
     "复制window风格路径",
     "复制双反斜杠路径",
     "复制Linux风格路径",
@@ -37,12 +38,14 @@ GIcon := IniRead(GConf, "default", "icon", "icon.png")
 GReloadMode := IniRead(GConf, "default", "reload", "Flase")
 GGitBash := IniRead(GConf, "default", "git", null)
 GTimeout := IniRead(GConf, "default", "timeout", 5000)
-GKeysMenuDelayStyle := IniRead(GConf, "default", "keys_menu_delay", "custom")
-GKeysMenuStyle := IniRead(GConf, "default", "keys_menu", "built-in")
+GKeysMenuDelayStyle := IniRead(GConf, "default", "keys_menu_delay", "built-in")
+GKeysMenuStyle := IniRead(GConf, "default", "keys_menu", "custom")
 GCustomItems := IniRead(GConf, "custom-items")
 GSubjects := IniRead(GConf, "subjects")
-GCustomGuiButton := IniRead(GConf, "custom-gui", "button", "w260 h30")
 GHotkeys := IniRead(GConf, "hotkeys")
+GScriptsDir := IniRead(GConf, "default", "scripts_dir", "scripts")
+GScriptsGui := GScriptsDir "\" IniRead(GConf, "default", "scripts_gui", "gui")
+GReloadHook := IniRead(GConf, "reload_hook")
 
 if FileExist(GIcon)
     TraySetIcon GIcon
@@ -67,7 +70,9 @@ hotkeys
 ;;;;;;;;;;;;
 if "True" = GReloadMode
 {
-    focuses := ["main.ahk", "config.ini", "icon.png"]
+    focuses := []
+    Loop parse, GReloadHook, "`n`r"
+        focuses.Push(A_LoopField)
     for _, focus in focuses
     {
         If !FileExist(focus)
@@ -321,18 +326,21 @@ editMarkdown(path)
 
 shunt(c)
 {
-    global GCapacities
+    global GCapacities, GScriptsGui
     path := null
     index := 1
     switch  c {
         case GCapacities[index++]:
-	    Run "Calc"
+            Run "Calc"
         case GCapacities[index++]:
             if setPath(&path)
                 Run "explorer " path
         case GCapacities[index++]:
             if setPath(&path)
                 editMarkdown path
+        case GCapacities[index++]:
+            if FileExist(GScriptsGui)
+                Run GScriptsGui
         case GCapacities[index++]:
             if setPath(&path)
                 A_Clipboard := path
@@ -356,13 +364,6 @@ shunt(c)
     Return
 }
 
-itemClick(params*)
-{
-    params[1].Gui.Hide()
-    shunt(params[1].Text)
-    Return
-}
-
 menuHandler(Item, *)
 {
     shunt(Item)
@@ -371,20 +372,9 @@ menuHandler(Item, *)
 
 main(args*)
 {
-    global GGuiComOpt,GGuiUniTitle, GTimeout, GCapacities, GCustomItems, GCustomGuiButton
+    global GGuiComOpt,GGuiUniTitle, GTimeout, GCapacities, GCustomItems
     switch args[1]
     {
-        case "custom-gui":
-            if not WinExist(GGuiUniTitle)
-            {
-                ItemsGui := Gui(GGuiComOpt, GGuiUniTitle)
-                ItemsGui.MarginX := ItemsGui.MarginY := xpos := ypos := 0
-                Loop parse, GCustomItems, "`n`r"
-                    ItemsGui.Add("Button", GCustomGuiButton, A_LoopField).OnEvent("Click", itemClick)
-                MouseGetPos &xpos, &ypos
-                ItemsGui.Show("x" xpos " y" ypos)
-                SetTimer(()=>(ItemsGui.Destroy()), -GTimeout)
-            }
         case "custom":
             MyMenu := Menu()
             Loop parse, GCustomItems, "`n`r"
@@ -395,6 +385,8 @@ main(args*)
             index := 1
             MyMenu.Add GCapacities[index++], menuHandler
             MyMenu.Add GCapacities[index++], menuHandler
+            MyMenu.Add GCapacities[index++], menuHandler
+            MyMenu.Add
             MyMenu.Add GCapacities[index++], menuHandler
             MyMenu.Add
             Submenu1 := Menu()
