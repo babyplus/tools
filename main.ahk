@@ -316,7 +316,7 @@ editMarkdown(path)
         if RegExMatch(path, "([0-9]{6})\\([0-9]{2})([0-9]{2})\.(.*)\.(.*)$(?CCallout)")
         {
             FileAppend("# " title "  `n", mdFile, "UTF-8")
-            FileAppend("*" date "  `n", mdFile, "UTF-8")
+            FileAppend("*" date "*  `n", mdFile, "UTF-8")
         } else {
             FileAppend("# 待编辑  `n", mdFile, "UTF-8")
         }
