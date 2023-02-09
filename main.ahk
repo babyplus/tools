@@ -166,7 +166,10 @@ setTitle(&variable, &title, _*)
     titleGui := Gui(GGuiComOpt, GGuiUniTitle)
     titleGui.Add("Edit", "w160 h200 vContent -multi", "今日记录")
     titleGui.Add("ListBox", "w160 h200 x+10 vTitle", titles)
-    .OnEvent("change", (_*)=>(variable.type := types.Ingnore, title := titles[_[1].Gui["Title"].value]))
+    .OnEvent("change", (_*)=>(
+        title := _[1].Gui["Title"].value == 0 ? title : titles[_[1].Gui["Title"].value]
+        variable.type := _[1].Gui["Title"].value == 0 ? variable.type : types.Ingnore
+    ))
     titleGui.Add("Button", "x10 w80 default", "确定")
     .OnEvent("click", (_*)=>(
         variable.type := types.Ingnore, title := StrReplace(_[1].Gui["Content"].value, "`n", null)
