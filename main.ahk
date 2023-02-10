@@ -3,6 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ;; global values ;;
 ;;;;;;;;;;;;;;;;;;;
+
 undefined := "undefined"
 null := ""
 types := {
@@ -32,6 +33,7 @@ GMouseDelay := 20
 GPastEntries := Map()
 GPastEntriesSorted := []
 GHotkeysMap := Map()
+GHotkeyScriptsMap := Map()
 GConf := "config.ini"
 GEditor := IniRead(GConf, "default", "editor", "notepad")
 GIcon := IniRead(GConf, "default", "icon", "icon.png")
@@ -43,6 +45,7 @@ GKeysMenuStyle := IniRead(GConf, "default", "keys_menu", "custom")
 GCustomItems := IniRead(GConf, "custom-items")
 GSubjects := IniRead(GConf, "subjects")
 GHotkeys := IniRead(GConf, "hotkeys")
+GHotkeyScripts := IniRead(GConf, "hotkey_scripts")
 GScriptsDir := IniRead(GConf, "default", "scripts_dir", "scripts")
 GScriptsGui := GScriptsDir "\" IniRead(GConf, "default", "scripts_gui", "gui")
 GReloadHook := IniRead(GConf, "reload_hook")
@@ -58,16 +61,19 @@ GKeysMenuDelay:= IniRead(GConf, "keys_menu_delay")
 ;;;;;;;;;;;;
 ;; Action ;;
 ;;;;;;;;;;;;
+
 Loop parse, GKeysMenu, "`n`r"
     Hotkey A_LoopField, keysMenu
 Loop parse, GKeysMenuDelay, "`n`r"
     Hotkey A_LoopField, keysMenuDelay
 hotkeys
+hotkey_scripts
 
 
 ;;;;;;;;;;;;
 ;; Reload ;;
 ;;;;;;;;;;;;
+
 if "True" = GReloadMode
 {
     focuses := []
@@ -95,7 +101,7 @@ if "True" = GReloadMode
                     GLatestModTimestamps[focus] := ModTimestamp
             }
         }
-        sleep 3
+        sleep 1500
     }
 }
 Exit
@@ -103,6 +109,7 @@ Exit
 ;;;;;;;;;;;;;;;
 ;; Functions ;;
 ;;;;;;;;;;;;;;;
+
 setValueViaGui(&variable, &inputGui)
 {
     variable.type := types.Undefined
@@ -318,10 +325,10 @@ editMarkdown(path)
         }
         if RegExMatch(path, "([0-9]{6})\\([0-9]{2})([0-9]{2})\.(.*)\.(.*)$(?CCallout)")
         {
-            FileAppend("# " title "  `n", mdFile, "UTF-8")
-            FileAppend("*" date "*  `n", mdFile, "UTF-8")
+            FileAppend("# " title "  `n`n", mdFile, "UTF-8")
+            FileAppend("*" date "*  `n`n", mdFile, "UTF-8")
         } else {
-            FileAppend("# 待编辑  `n", mdFile, "UTF-8")
+            FileAppend("# 待编辑  `n`n", mdFile, "UTF-8")
         }
     }
     Run(GEditor " " mdFile)
@@ -444,5 +451,16 @@ hotkeys()
         kv := StrSplit(A_LoopField, "=")
         GHotkeysMap[kv[1]] := kv[2]
         hotkey kv[1], (_)=>(send(GHotkeysMap[_]))
+    }
+}
+
+hotkey_scripts()
+{
+    global GHotkeyScripts, GHotkeyScriptsMap
+    Loop parse, GHotkeyScripts, "`n`r"
+    {
+        kv := StrSplit(A_LoopField, "=")
+        GHotkeyScriptsMap[kv[1]] := kv[2]
+        hotkey kv[1], (_)=>(Run(GHotkeyScriptsMap[_]))
     }
 }
