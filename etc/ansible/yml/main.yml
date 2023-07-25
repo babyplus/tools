@@ -1,0 +1,12 @@
+---
+- hosts: hosts
+  pre_tasks:
+    - name: Begin tasks. 
+      ping:
+  roles:
+    - patrol
+    - {role: patrol, informations: ["cpu", "memory"], total: "2", pause: "2"}
+  post_tasks:
+    - name: End tasks.
+      debug:
+        msg: END.

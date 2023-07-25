@@ -1,0 +1,28 @@
+remote_logs_path: /tmp
+local_logs_path: /etc/ansible/logs
+total: "1"
+pause: "0"
+informations: []
+description:  "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime(ansible_date_time.epoch) }} {{ ansible_date_time.weekday }}"
+devices: "{{ ansible_devices | sort }}"
+partitions: "{{ {} | combine(devices | select('search', '^[sd|mmc].*$') | map('extract', ansible_devices, 'partitions') | list) }}"
+partitions_list: "{{ partitions | list }}"
+partition_sizes: "{{ dict(partitions_list | zip(partitions_list | map('extract', partitions, 'size'))) }}"
+device_mappers_list: "{{ ansible_device_links.ids | select('search', '^dm.*$') | list }}"
+device_mappers: "{{ dict(device_mappers_list | zip(device_mappers_list | map('extract', ansible_device_links.ids) | map('first') | list)) }}"
+facts_dict:
+    - { "architecture": "{{ ansible_architecture }}" }
+    - { "cmdline.BOOT_IMAGE": "{{ ('BOOT_IMAGE' in ansible_cmdline) | ternary(ansible_cmdline['BOOT_IMAGE'], 'nil') }}" }
+    - { "uptime_seconds": "{{ ansible_uptime_seconds }}" }
+    - { "date_time.epoch": "{{ ansible_date_time.epoch }}" }
+    - { "processor_cores": "{{ ansible_processor_cores }}" }
+    - { "processor_threads_per_core": "{{ ansible_processor_threads_per_core }}" }
+    - { "memtotal_mb": "{{ ansible_memtotal_mb }}" }
+    - { "memfree_mb": "{{ ansible_memfree_mb }}" }
+    - { "swaptotal_mb": "{{ ansible_swaptotal_mb }}" }
+    - { "swapfree_mb ": "{{ ansible_swapfree_mb }}" }
+    - { "interfaces ": "{{ ansible_interfaces | sort }}" }
+    - { "devices ": "{{ devices }}" }
+    - { "partition_sizes": "{{ partition_sizes }}" }
+    - { "masters": "{{ ansible_device_links.masters }}" }
+    - { "device_mappers": "{{ device_mappers }}" }

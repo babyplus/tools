@@ -1,0 +1,11 @@
+- name: check the informations
+  script: "scripts/check_{{ item }}.sh {{ total }} {{ pause }} > {{ item }}.log"
+  args:
+      chdir: "{{ remote_logs_path }}"
+  with_items: "{{ informations }}"
+- name: fetch the informations
+  fetch:
+      src: "{{ remote_logs_path }}/{{ item }}.log"
+      dest: "{{ local_logs_path }}/{{ inventory_hostname }}/{{ ansible_date_time.tz }}_{{ ansible_date_time.date }}_{{ item }}.log"
+      flat: "yes"
+  with_items: "{{ informations }}"

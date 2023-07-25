@@ -1,0 +1,4 @@
+[hosts]
+office ansible_ssh_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+archlinux ansible_ssh_user=root ansible_port=2222 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+orangepi ansible_ssh_user=orangepi ansible_ssh_common_args='-o StrictHostKeyChecking=no'

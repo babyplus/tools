@@ -1,0 +1,17 @@
+- name: Create a directory if it does not exist
+  file:
+    path: "{{ local_logs_path }}/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+- name: Init the record
+  shell: "echo --- > {{ local_logs_path }}/{{ inventory_hostname }}/{{ ansible_date_time.tz }}_{{ ansible_date_time.date }}_base.log"
+  delegate_to: localhost
+- name: Print the description
+  shell: "echo {{ description | comment | quote }} >> {{ local_logs_path }}/{{ inventory_hostname }}/{{ ansible_date_time.tz }}_{{ ansible_date_time.date }}_base.log"
+  delegate_to: localhost
+- name: Record the facts
+  shell: "echo - {{ item.key }}: {{ item.value }} >> {{ local_logs_path }}/{{ inventory_hostname }}/{{ ansible_date_time.tz }}_{{ ansible_date_time.date }}_base.log"
+  ignore_errors: true
+  with_dict: "{{ facts_dict }}"
+  delegate_to: localhost

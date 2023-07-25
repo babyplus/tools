@@ -1,0 +1,4 @@
+- include: base.yml
+  when: "informations|length==0"
+- include: custom.yml
+  when: "informations|length>=1"
