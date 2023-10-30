@@ -1,7 +1,7 @@
 BEGIN{
     global dir
     global file
-    dir = "."
+    dir = dir ? dir : "."
     file = ""
     diagrams = ""
     diagram = ""
@@ -14,7 +14,7 @@ function print_to_file(text){
 
 function create_a_diagram(name){
     print_to_file("  <diagram name=\""name"\" id=\""name"\">")
-    print_to_file("    <mxGraphModel>"                       )
+    print_to_file("    <mxGraphModel grid=\"0\">"            )
     print_to_file("      <root>"                             )
     print_to_file("        <mxCell id=\"0\" />"              )
     print_to_file("        <mxCell id=\"1\" parent=\"0\" />" )
