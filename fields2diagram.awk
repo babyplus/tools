@@ -4,15 +4,18 @@ BEGIN{
   srand(systime())
   parent0=parent0 ? parent0 : rand()
   parent1=parent1 ? parent1 : rand()
-  position["x"]=position_x ? position_x : 20
-  position["y"]=position_y ? position_y : 20
+  parent2=parent2 ? parent2 : rand()
+  default_position_x=20
+  default_position_y=20
+  position["x"]=position_x ? position_x : default_position_x
+  position["y"]=position_y ? position_y : default_position_y
   height=height ? height : 60
   field=""
   n_len=0
   conditions=""
   dashed=0
   territories[""]=""
-  desc_territory_name="desc"
+  note_territory_name="note"
   colors[""]=""
   color_gray="#888888"
   url_encode_and="&amp;amp;"
@@ -47,6 +50,14 @@ function get_color(text){
   return colors[text] ? colors[text] : new_color(text)
 }
 
+function get_light_color(text){
+  tmp_color=get_color(text)
+  colors["_"text]=sprintf("#%X%c%X%c%X%c\n",strtonum("0x"substr(tmp_color, 2, 1))+2,substr(tmp_color, 3, 1),
+                           strtonum("0x"substr(tmp_color, 4, 1))+2,substr(tmp_color, 5, 1),
+                           strtonum("0x"substr(tmp_color, 6, 1))+2,substr(tmp_color, 7, 1))
+  return colors["_"text]
+}
+
 function polish(color,text){
   color=color ? color : get_color(text)
   return "&lt;font color=&quot;"color"&quot;&gt;"text"&lt;/font&gt;"
@@ -57,24 +68,34 @@ function record_named_territory(name,x1,x2,y1,y2){
   territories[name] "|" x1":"x2":"y1":"y2 : x1":"x2":"y1":"y2
 }
 
-function print_a_mxCell(mxCell_args, mxGeo_args){
+function print_a_mxCell(mxCell_args, mxGeo_args, ex){
   tmp_id=mxCell_args["id"] ? mxCell_args["id"] : mxCell_args["annotation"]rand()
   tmp_value=mxCell_args["value"] ? mxCell_args["value"] : ""
   tmp_style=mxCell_args["style"] ? mxCell_args["style"] : ""
   tmp_vertex=mxCell_args["vertex"] ? mxCell_args["vertex"] : "1"
   tmp_parent=mxCell_args["parent"] ? mxCell_args["parent"] : ""
-  tmp_x=mxGeo_args["x"] ? mxGeo_args["x"] : 0 
-  tmp_y=mxGeo_args["y"] ? mxGeo_args["y"] : 0 
+  tmp_x=mxGeo_args["x"] ? mxGeo_args["x"] : 0
+  tmp_y=mxGeo_args["y"] ? mxGeo_args["y"] : 0
   tmp_w=mxGeo_args["width"] ? mxGeo_args["width"] : 1
   tmp_h=mxGeo_args["height"] ? mxGeo_args["height"] : 20
-  print("<mxCell id=\""tmp_id"\" value=\""tmp_value"\" style=\""tmp_style"\" vertex=\""tmp_vertex"\" parent=\""tmp_parent"\">")
-  print("<mxGeometry x=\""tmp_x"\" y=\""tmp_y"\" width=\""tmp_w"\" height=\""tmp_h"\" as=\"geometry\" />")
-  print("</mxCell>")
+  ex["type"]=ex["type"]?ex["type"]:"block"
+  if("block"==ex["type"]){
+    print("<mxCell id=\""tmp_id"\" value=\""tmp_value"\" style=\""tmp_style"\" vertex=\""tmp_vertex"\" parent=\""tmp_parent"\">")
+    print("<mxGeometry x=\""tmp_x"\" y=\""tmp_y"\" width=\""tmp_w"\" height=\""tmp_h"\" as=\"geometry\" />")
+    print("</mxCell>")
+  }else if("line"==ex["type"]){
+    print("<mxCell id=\""tmp_id"\" value=\"\" style=\""tmp_style"\" edge=\"1\" parent=\""tmp_parent"\" source=\""ex["source"]"\" target=\""ex["target"]"\">")
+    print("<mxGeometry width=\"50\" height=\"50\" relative=\"1\" as=\"geometry\">")
+    print("<mxPoint x=\"530\" y=\"450\" as=\"sourcePoint\" />")
+    print("<mxPoint x=\"580\" y=\"400\" as=\"targetPoint\" />")
+    print("</mxGeometry>")
+    print("</mxCell>")
+  }
   delete mxCell_args
   delete mxGeo_args
 }
 
-function create_a_desc(parent,x,y,text,ex){
+function create_a_note(parent,x,y,text,ex){
   tmp_n=split(text,tmp_list,"&")
   tmp_top=1
   tmp_height=20
@@ -82,29 +103,29 @@ function create_a_desc(parent,x,y,text,ex){
   tmp_style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;"
   for(tmp_i=1;tmp_i<=tmp_n;tmp_i++){
     if(!tmp_top){
-      mxCell_args["id"]="desc_"rand()
+      mxCell_args["id"]="note_"rand()
       mxCell_args["value"]=polish(color_gray, url_encode_and)
       mxCell_args["style"]=tmp_style
       mxCell_args["parent"]=parent
       mxGeo_args["x"]=x
       mxGeo_args["y"]=y
-      print_a_mxCell(mxCell_args, mxGeo_args) 
+      print_a_mxCell(mxCell_args, mxGeo_args)
       tmp_width=8
-      record_named_territory(desc_territory_name,x,x+tmp_width,y,y+tmp_height)
+      record_named_territory(note_territory_name,x,x+tmp_width,y,y+tmp_height)
       x+=tmp_width
     }
     tmp_value=tmp_list[tmp_i]
     tmp_width=calc_length(tmp_value)
     tmp_value= roughcast ? polish(color_gray, tmp_value) : polish("", tmp_value)
-    mxCell_args["id"]="desc_"rand()
+    mxCell_args["id"]="note_"rand()
     mxCell_args["value"]=tmp_value
     mxCell_args["style"]=tmp_style
     mxCell_args["parent"]=parent
     mxGeo_args["x"]=x
     mxGeo_args["y"]=y
     mxGeo_args["width"]=tmp_width
-    print_a_mxCell(mxCell_args, mxGeo_args) 
-    record_named_territory(desc_territory_name,x,x+tmp_width,y,y+tmp_height)
+    print_a_mxCell(mxCell_args, mxGeo_args)
+    record_named_territory(note_territory_name,x,x+tmp_width,y,y+tmp_height)
     x+=tmp_width
     tmp_top=0
   }
@@ -123,53 +144,98 @@ function check_territory(name, x, y){
   return 0
 }
 
-function create_a_section(parent, position, field, height, len, n_len, conditions){
-  width=len*n_len
+function create_a_section(parent, position, conditions, ex){
+  width=ex["len"]*ex["n_len"]
   dashed=conditions ? 1 : 0
-  has_condition_desc=conditions ? 1 : 0
-  section_desc=field":"n_len
+  has_condition_note=conditions ? 1 : 0
+  section_desc=ex["field"]":"ex["n_len"]
   if(calc_length(section_desc) >= width){
     y_offset=0
     do{
       y_offset-=20
-    } while (check_territory(desc_territory_name, position["x"], position["y"]+y_offset))
+    } while (check_territory(note_territory_name, position["x"], position["y"]+y_offset))
     ex["roughcast"]=1
-    create_a_desc(parent, position["x"], position["y"]+y_offset, section_desc, ex)
+    create_a_note(parent, position["x"], position["y"]+y_offset, section_desc, ex)
     section_desc=""
   }
-  if(has_condition_desc){
+  if(has_condition_note){
     y_offset=0
     do{
       y_offset-=20
-    } while (check_territory(desc_territory_name, position["x"], position["y"]+y_offset))
+    } while (check_territory(note_territory_name, position["x"], position["y"]+y_offset))
     ex["roughcast"]=0
-    create_a_desc(parent, position["x"], position["y"]+y_offset, conditions, ex)
+    create_a_note(parent, position["x"], position["y"]+y_offset, conditions, ex)
   }
-  mxCell_args["id"]=field"_"rand()
+  mxCell_args["id"]=ex["field"]"_"rand()
   mxCell_args["value"]=polish(color_gray, section_desc)
   mxCell_args["style"]="rounded=0;whiteSpace=wrap;html=1;dashed="dashed";dashPattern=1 1;"
   mxCell_args["parent"]=parent
   mxGeo_args["x"]=position["x"]
   mxGeo_args["y"]=position["y"]
   mxGeo_args["width"]=width
-  mxGeo_args["height"]=height
-  print_a_mxCell(mxCell_args, mxGeo_args) 
+  mxGeo_args["height"]=ex["height"]
+  line_target[ex["field"]]= mxCell_args["id"]
+  print_a_mxCell(mxCell_args, mxGeo_args)
   position["x"]+=width
+}
+
+function create_a_context(parent, position, context, ex){
+  width=ex["len"]*ex["n_len"]
+  tmp_color1=get_color(ex["field"])
+  tmp_color2=get_light_color(ex["field"])
+  mxCell_args["id"]="context_"rand()
+  mxCell_args["value"]=ex["field"]":"context
+  mxCell_args["style"]="html=1;outlineConnect=0;fillColor="tmp_color2";strokeColor="tmp_color1";gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.bus;gradientDirection=north;fontColor=#222222;perimeter=backbonePerimeter;backboneSize=20;shadow=0;sketch=0;opacity=100;fontSize=14;align=left;"
+  mxCell_args["parent"]=parent
+  mxGeo_args["width"]=total_width+20
+  mxGeo_args["x"]=default_position_x-10
+  mxGeo_args["y"]=position["y"]+100+45*ex["NR"]
+  line_source[ex["field"]]= mxCell_args["id"]
+  print_a_mxCell(mxCell_args, mxGeo_args)
+  mxCell_args["id"]="line_"rand()
+  mxCell_args["value"]=""
+  mxCell_args["style"]="endArrow=none;html=1;rounded=0;entryX=0.15;entryY=1;entryDx=0;entryDy=0;strokeColor="tmp_color1";"
+  mxCell_args["parent"]=parent
+  mxGeo_args["width"]=total_width
+  mxGeo_args["x"]=default_position_x
+  mxGeo_args["y"]=position["y"]+100+45*ex["NR"]
+  ex["type"]="line"
+  ex["source"]=line_source[ex["field"]]
+  ex["target"]=line_target[ex["field"]]
+  print_a_mxCell(mxCell_args, mxGeo_args, ex)
 }
 
 BEGIN{
   parents[0]=parent0
   parents[1]=parent1
+  parents[2]=parent2
+  total_width=0
   begin_parents(parents)
 }
 
 {
-  field=$1
-  n_len=$2
-  conditions=$3
-  create_a_section(parent1, position, field, height, len, n_len, conditions) 
+  total_width+=$2*len
+  rows[NR]=$0
+}
+
+END{
+  for(tmp_NR=1;tmp_NR<=length(rows);tmp_NR++){
+    split(rows[tmp_NR],tmp_columns,",")
+    field=tmp_columns[1]
+    n_len=tmp_columns[2]
+    conditions=tmp_columns[3]
+    ex["field"]=field
+    ex["height"]=height
+    ex["len"]=len
+    ex["n_len"]=n_len
+    ex["NR"]=tmp_NR
+    create_a_section(parent1, position, conditions, ex)
+    context=tmp_columns[4]
+    create_a_context(parent2, position, context, ex)
+  }
 }
 
 END{
   end_parents()
 }
+

@@ -5,5 +5,5 @@
 ## 测试
 
 ```
-for n in {1..20}; do echo field$n, $((RANDOM%16+1)), $((RANDOM%3));done | awk -f fields2diagram.awk
+for n in {1..20}; do echo field$n, $((RANDOM%16+1)), $((RANDOM%3)), $RANDOM;done | awk -f fields2diagram.awk
 ```
