@@ -78,16 +78,16 @@ function print_a_mxCell(mxCell_args, mxGeo_args, ex){
   tmp_y=mxGeo_args["y"] ? mxGeo_args["y"] : 0
   tmp_w=mxGeo_args["width"] ? mxGeo_args["width"] : 1
   tmp_h=mxGeo_args["height"] ? mxGeo_args["height"] : 20
-  ex["type"]=ex["type"]?ex["type"]:"block"
+  ex["type"]=ex["type"] ? ex["type"] : "block"
   if("block"==ex["type"]){
     print("<mxCell id=\""tmp_id"\" value=\""tmp_value"\" style=\""tmp_style"\" vertex=\""tmp_vertex"\" parent=\""tmp_parent"\">")
     print("<mxGeometry x=\""tmp_x"\" y=\""tmp_y"\" width=\""tmp_w"\" height=\""tmp_h"\" as=\"geometry\" />")
     print("</mxCell>")
   }else if("line"==ex["type"]){
     print("<mxCell id=\""tmp_id"\" value=\"\" style=\""tmp_style"\" edge=\"1\" parent=\""tmp_parent"\" source=\""ex["source"]"\" target=\""ex["target"]"\">")
-    print("<mxGeometry width=\"50\" height=\"50\" relative=\"1\" as=\"geometry\">")
-    print("<mxPoint x=\"530\" y=\"450\" as=\"sourcePoint\" />")
-    print("<mxPoint x=\"580\" y=\"400\" as=\"targetPoint\" />")
+    print("<mxGeometry relative=\"1\" as=\"geometry\">")
+    print("<mxPoint as=\"sourcePoint\" />")
+    print("<mxPoint as=\"targetPoint\" />")
     print("</mxGeometry>")
     print("</mxCell>")
   }
@@ -168,7 +168,7 @@ function create_a_section(parent, position, conditions, ex){
   }
   mxCell_args["id"]=ex["field"]"_"rand()
   mxCell_args["value"]=polish(color_gray, section_desc)
-  mxCell_args["style"]="rounded=0;whiteSpace=wrap;html=1;dashed="dashed";dashPattern=1 1;"
+  mxCell_args["style"]="rounded=0;whiteSpace=wrap;html=1;dashed="dashed";dashPattern=1 1;strokeColor="get_color(ex["field"])";fillColor=" (dashed ? "#F7F7F7" : "#FFFFFF") ";"
   mxCell_args["parent"]=parent
   mxGeo_args["x"]=position["x"]
   mxGeo_args["y"]=position["y"]
