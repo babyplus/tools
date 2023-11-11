@@ -19,6 +19,7 @@ BEGIN{
   colors[""]=""
   color_gray="#888888"
   url_encode_and="&amp;amp;"
+  lines[""]=""
 }
 
 function begin_parents(parents){
@@ -40,9 +41,9 @@ function calc_length(text){
 
 function new_color(text){
   colors[text]=sprintf("#%X%X%X%X%X%X",
-               rand()*10+4, rand()*16,
-               rand()*10+4, rand()*16,
-               rand()*10+4, rand()*16);
+               rand()*8+6, rand()*16,
+               rand()*8+6, rand()*16,
+               rand()*8+6, rand()*16);
   return colors[text]
 }
 
@@ -56,6 +57,14 @@ function get_light_color(text){
                            strtonum("0x"substr(tmp_color, 4, 1))+2,substr(tmp_color, 5, 1),
                            strtonum("0x"substr(tmp_color, 6, 1))+2,substr(tmp_color, 7, 1))
   return colors["_"text]
+}
+
+function get_dark_color(text){
+  tmp_color=get_color(text)
+  colors["+"text]=sprintf("#%X%c%X%c%X%c\n",strtonum("0x"substr(tmp_color, 2, 1))-4,substr(tmp_color, 3, 1),
+                           strtonum("0x"substr(tmp_color, 4, 1))-4,substr(tmp_color, 5, 1),
+                           strtonum("0x"substr(tmp_color, 6, 1))-4,substr(tmp_color, 7, 1))
+  return colors["+"text]
 }
 
 function polish(color,text){
@@ -144,6 +153,28 @@ function check_territory(name, x, y){
   return 0
 }
 
+function append_arr(arrs, key, value){
+  arrs[key"_n"]=arrs[key"_n"] ? arrs[key"_n"]+1 : 1
+  arrs[key"_"arrs[key"_n"]]=value
+}
+
+function get_arr_len(arrs, key){
+  return arrs[key"_n"]
+}
+
+function get_arr_val(arrs, key, n){
+  return arrs[key"_"n]
+}
+
+function reg_line(line, type, value){
+  append_arr(lines, line"_"type, value)
+}
+
+function get_endpoint(container, key, target_index, source_index){
+  container["target"]=get_arr_val(lines, key"_target", target_index)
+  container["source"]=get_arr_val(lines, key"_source", source_index)
+}
+
 function create_a_section(parent, position, conditions, ex){
   width=ex["len"]*ex["n_len"]
   dashed=conditions ? 1 : 0
@@ -168,41 +199,46 @@ function create_a_section(parent, position, conditions, ex){
   }
   mxCell_args["id"]=ex["field"]"_"rand()
   mxCell_args["value"]=polish(color_gray, section_desc)
-  mxCell_args["style"]="rounded=0;whiteSpace=wrap;html=1;dashed="dashed";dashPattern=1 1;strokeColor="get_color(ex["field"])";fillColor=" (dashed ? "#F7F7F7" : "#FFFFFF") ";"
+  mxCell_args["style"]="rounded=0;whiteSpace=wrap;html=1;dashed="dashed";dashPattern=1 1;strokeColor="color_gray";fillColor=" (dashed ? "#F7F7F7" : "#FFFFFF") ";"
   mxCell_args["parent"]=parent
   mxGeo_args["x"]=position["x"]
   mxGeo_args["y"]=position["y"]
   mxGeo_args["width"]=width
   mxGeo_args["height"]=ex["height"]
-  line_target[ex["field"]]= mxCell_args["id"]
+  reg_line(ex["field"], "target", mxCell_args["id"])
   print_a_mxCell(mxCell_args, mxGeo_args)
   position["x"]+=width
 }
 
-function create_a_context(parent, position, context, ex){
+function create_a_bus(parent, position, context, ex){
   width=ex["len"]*ex["n_len"]
-  tmp_color1=get_color(ex["field"])
   tmp_color2=get_light_color(ex["field"])
+  tmp_color3=get_dark_color(ex["field"])
   mxCell_args["id"]="context_"rand()
-  mxCell_args["value"]=ex["field"]":"context
-  mxCell_args["style"]="html=1;outlineConnect=0;fillColor="tmp_color2";strokeColor="tmp_color1";gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.bus;gradientDirection=north;fontColor=#222222;perimeter=backbonePerimeter;backboneSize=20;shadow=0;sketch=0;opacity=100;fontSize=14;align=left;"
+  mxCell_args["value"]="  "ex["field"]":"context
+  mxCell_args["style"]="html=1;outlineConnect=0;fillColor="tmp_color2";strokeColor="tmp_color3";gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.bus;gradientDirection=north;fontColor=#222222;perimeter=backbonePerimeter;backboneSize=20;shadow=0;sketch=0;opacity=100;fontSize=18;align=left"
   mxCell_args["parent"]=parent
   mxGeo_args["width"]=total_width+20
-  mxGeo_args["x"]=default_position_x-10
-  mxGeo_args["y"]=position["y"]+100+45*ex["NR"]
-  line_source[ex["field"]]= mxCell_args["id"]
-  print_a_mxCell(mxCell_args, mxGeo_args)
-  mxCell_args["id"]="line_"rand()
-  mxCell_args["value"]=""
-  mxCell_args["style"]="endArrow=none;html=1;rounded=0;entryX=0.15;entryY=1;entryDx=0;entryDy=0;strokeColor="tmp_color1";"
-  mxCell_args["parent"]=parent
-  mxGeo_args["width"]=total_width
   mxGeo_args["x"]=default_position_x
   mxGeo_args["y"]=position["y"]+100+45*ex["NR"]
+  reg_line(ex["field"], "source", mxCell_args["id"])
+  print_a_mxCell(mxCell_args, mxGeo_args)
+}
+
+function create_lines(parent, ex){
   ex["type"]="line"
-  ex["source"]=line_source[ex["field"]]
-  ex["target"]=line_target[ex["field"]]
-  print_a_mxCell(mxCell_args, mxGeo_args, ex)
+  tmp_entryX=0.95
+  for (tmp_i=1;tmp_i<=get_arr_len(lines, ex["field"]"_target");tmp_i++){
+    tmp_entryX-=0.05
+    for (tmp_j=1;tmp_j<=get_arr_len(lines, ex["field"]"_source");tmp_j++){
+      mxCell_args["id"]="line_"rand()
+      tmp_color=get_dark_color(ex["field"])
+      mxCell_args["style"]="endArrow=none;html=1;rounded=0;entryX="tmp_entryX";entryY=1;entryDx=0;entryDy=0;strokeColor="tmp_color";"
+      mxCell_args["parent"]=parent
+      get_endpoint(ex, ex["field"], tmp_i, tmp_j)
+      print_a_mxCell(mxCell_args, mxGeo_args, ex)
+    }
+  }
 }
 
 BEGIN{
@@ -224,14 +260,15 @@ END{
     field=tmp_columns[1]
     n_len=tmp_columns[2]
     conditions=tmp_columns[3]
+    context=tmp_columns[4]
     ex["field"]=field
     ex["height"]=height
     ex["len"]=len
     ex["n_len"]=n_len
     ex["NR"]=tmp_NR
     create_a_section(parent1, position, conditions, ex)
-    context=tmp_columns[4]
-    create_a_context(parent2, position, context, ex)
+    create_a_bus(parent2, position, context, ex)
+    create_lines(parent2, ex)
   }
 }
 
